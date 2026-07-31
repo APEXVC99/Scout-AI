@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { createServerFn } from "@tanstack/react-start";
 import { readFile } from "node:fs/promises";
 import { useState } from "react";
-import { sql } from "~/db";
+import { submitWaitlistEmail } from "./api/-waitlist";
 
 const getBusinessName = createServerFn({ method: "GET" }).handler(async () => {
   try {
@@ -14,57 +14,6 @@ const getBusinessName = createServerFn({ method: "GET" }).handler(async () => {
     return "Scout AI";
   }
 });
-
-/*
-  CREATE TABLE waitlist_subscribers (
-    id         uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-    email      text UNIQUE NOT NULL,
-    created_at timestamptz DEFAULT now()
-  );
-*/
-const submitEmail = createServerFn({ method: "POST" })
-  .validator((input: unknown) => {
-    if (typeof input !== "object" || input === null || !("email" in input)) {
-      throw new Error("Invalid input");
-    }
-    const { email } = input as { email: unknown };
-    if (typeof email !== "string") {
-      throw new Error("Email must be a string");
-    }
-    return { email: email.trim().toLowerCase() };
-  })
-  .handler(async ({ data }) => {
-    const { email } = data;
-
-    // Basic email format check (double-check server-side)
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      return { error: "Please enter a valid email address." };
-    }
-
-    try {
-      // Ensure the table exists (idempotent)
-      await sql()`CREATE TABLE IF NOT EXISTS waitlist_subscribers (
-        id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-        email text UNIQUE NOT NULL,
-        created_at timestamptz DEFAULT now()
-      )`;
-
-      await sql()`INSERT INTO waitlist_subscribers (email) VALUES (${email})`;
-      return { success: true } as const;
-    } catch (err: unknown) {
-      // Postgres unique violation code is 23505
-      const code = (err as { code?: string })?.code;
-      const msg = (err as { message?: string })?.message ?? "";
-      if (
-        code === "23505" ||
-        msg.includes("unique") ||
-        msg.includes("duplicate")
-      ) {
-        return { error: "You're already on the list!" } as const;
-      }
-      return { error: "Something went wrong. Please try again." } as const;
-    }
-  });
 
 export const Route = createFileRoute("/")({
   loader: () => getBusinessName(),
@@ -443,7 +392,7 @@ function Waitlist() {
     setStatus("loading");
 
     try {
-      const result = await submitEmail({
+      const result = await submitWaitlistEmail({
         data: { email: email.trim().toLowerCase() },
       });
 
@@ -547,15 +496,14 @@ function Footer({ businessName }: { businessName: string }) {
     <footer className="border-t border-gray-100 px-6 py-8 dark:border-gray-800">
       <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 text-sm text-gray-400 dark:text-gray-600 sm:flex-row">
         <p>&copy; {new Date().getFullYear()} {businessName}. All rights reserved.</p>
-        <p>
-          Built with{" "}
-          <a
-            href="https://cto.new"
-            className="underline hover:text-gray-600 dark:hover:text-gray-400"
-          >
-            cto.new
+        <nav className="flex gap-6">
+          <a href="/terms" className="hover:text-gray-600 dark:hover:text-gray-400">
+            Terms of Service
           </a>
-        </p>
+          <a href="/privacy" className="hover:text-gray-600 dark:hover:text-gray-400">
+            Privacy Policy
+          </a>
+        </nav>
       </div>
     </footer>
   );
