@@ -1,5 +1,8 @@
 import { createServerFn } from "@tanstack/react-start";
 import { sql } from "~/db";
+import { readFile, writeFile, mkdir } from "node:fs/promises";
+import { existsSync } from "node:fs";
+import { dirname } from "node:path";
 
 /**
  * Waitlist API endpoint — TanStack Start v1 server function.
@@ -39,6 +42,25 @@ export const submitWaitlistEmail = createServerFn({ method: "POST" })
       )`;
 
       await sql()`INSERT INTO waitlist_subscribers (email) VALUES (${email})`;
+
+      // Append to shared notification file for the team lead's email alerts.
+      // This is best-effort: DB insert is the primary operation.
+      const NOTIFY_PATH = "/home/team/shared/new-waitlist-signups.json";
+      try {
+        const entry = { email, timestamp: new Date().toISOString() };
+        let records: unknown[] = [];
+        if (existsSync(NOTIFY_PATH)) {
+          const raw = await readFile(NOTIFY_PATH, "utf-8");
+          const parsed = JSON.parse(raw);
+          if (Array.isArray(parsed)) records = parsed;
+        }
+        records.push(entry);
+        await mkdir(dirname(NOTIFY_PATH), { recursive: true });
+        await writeFile(NOTIFY_PATH, JSON.stringify(records, null, 2) + "\n", "utf-8");
+      } catch {
+        // File write failed — not fatal; DB insert already succeeded.
+      }
+
       return { success: true } as const;
     } catch (err: unknown) {
       // Postgres unique violation code is 23505
