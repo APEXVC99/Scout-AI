@@ -45,7 +45,7 @@ export const Route = createRootRoute({
 function RootComponent() {
   return (
     <ClerkProvider
-      publishableKey={process.env.CLERK_PUBLISHABLE_KEY ?? ""}
+      publishableKey={import.meta.env.VITE_CLERK_PUBLISHABLE_KEY ?? ""}
     >
       <RootDocument>
         <Outlet />
