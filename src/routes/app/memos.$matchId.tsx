@@ -1,5 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useState } from "react";
 import { getExistingMemo, type DealMemoData } from "./-memo-actions";
+import { generateOutreach, checkMatchHasOutreach, getOutreachForMatchFn } from "./-outreach-actions";
 
 export const Route = createFileRoute("/app/memos/$matchId")({
   loader: async ({ params }) => {
@@ -280,6 +282,34 @@ function renderInlineMarkdown(text: string): React.ReactNode {
 
 function MemoDetailPage() {
   const { memo } = Route.useLoaderData();
+  const [outreachGenerating, setOutreachGenerating] = useState(false);
+  const [outreachExists, setOutreachExists] = useState(false);
+  const [outreachChecked, setOutreachChecked] = useState(false);
+  const [outreachError, setOutreachError] = useState<string | null>(null);
+
+  const handleGenerateOutreach = async () => {
+    if (!memo) return;
+    setOutreachGenerating(true);
+    setOutreachError(null);
+    try {
+      const matchId = window.location.pathname.split("/").pop() || "";
+      await generateOutreach({ data: { matchId } });
+      setOutreachExists(true);
+    } catch (err) {
+      setOutreachError(err instanceof Error ? err.message : "Unknown error");
+    } finally {
+      setOutreachGenerating(false);
+    }
+  };
+
+  // Check if outreach exists on mount
+  if (!outreachChecked && memo) {
+    const matchId = window.location.pathname.split("/").pop() || "";
+    checkMatchHasOutreach({ data: { matchId } }).then((r) => {
+      setOutreachExists(r.hasOutreach);
+      setOutreachChecked(true);
+    }).catch(() => setOutreachChecked(true));
+  }
 
   if (!memo) {
     return (
