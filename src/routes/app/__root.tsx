@@ -1,6 +1,8 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
 import { Outlet, Link } from "@tanstack/react-router";
 import { UserButton, useAuth } from "@clerk/tanstack-start";
+import { useEffect } from "react";
+import { ToastProvider } from "~/components/Toast";
 
 export const Route = createFileRoute("/app/__root")({
   beforeLoad: async () => {
@@ -23,6 +25,24 @@ export const Route = createFileRoute("/app/__root")({
 
 function AppLayout() {
   const { isLoaded, isSignedIn } = useAuth();
+
+  // Check onboarding status on client-side (redirect to onboarding if needed)
+  useEffect(() => {
+    if (!isSignedIn) return;
+    const currentPath = window.location.pathname;
+    // Don't redirect if already on the onboarding page
+    if (currentPath === "/app/onboarding") return;
+
+    import("./-onboarding-actions")
+      .then(({ checkOnboarding }) =>
+        checkOnboarding().then((r) => {
+          if (!r.onboardingComplete && currentPath !== "/app/onboarding") {
+            window.location.href = "/app/onboarding";
+          }
+        }),
+      )
+      .catch(() => {});
+  }, [isSignedIn]);
 
   // Navigation items
   const navItems = [
@@ -52,66 +72,68 @@ function AppLayout() {
   }
 
   return (
-    <div className="flex min-h-screen bg-gray-50 dark:bg-gray-950">
-      {/* Sidebar */}
-      <aside className="fixed inset-y-0 left-0 z-40 flex w-64 flex-col border-r border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900">
-        {/* Logo */}
-        <div className="flex h-16 items-center gap-2 border-b border-gray-200 px-6 dark:border-gray-800">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-600 text-white text-sm font-bold">
-            S
-          </div>
-          <span className="text-lg font-bold tracking-tight text-gray-900 dark:text-white">
-            Scout AI
-          </span>
-        </div>
-
-        {/* Nav Links */}
-        <nav className="flex-1 overflow-y-auto px-3 py-4">
-          <ul className="space-y-1">
-            {navItems.map((item) => (
-              <li key={item.to}>
-                <Link
-                  to={item.to}
-                  activeOptions={item.exact ? { exact: true } : undefined}
-                  className="group flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-gray-600 transition hover:bg-gray-100 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-white"
-                  activeProps={{
-                    className:
-                      "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium bg-indigo-50 text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300",
-                  }}
-                >
-                  <item.icon />
-                  {item.label}
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </nav>
-
-        {/* User Section */}
-        <div className="border-t border-gray-200 p-4 dark:border-gray-800">
-          <div className="flex items-center gap-3">
-            <UserButton
-              afterSignOutUrl="/"
-              appearance={{
-                elements: {
-                  userButtonBox: "flex items-center",
-                },
-              }}
-            />
-            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-              Account
+    <ToastProvider>
+      <div className="flex min-h-screen bg-gray-50 dark:bg-gray-950">
+        {/* Sidebar */}
+        <aside className="fixed inset-y-0 left-0 z-40 flex w-64 flex-col border-r border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900">
+          {/* Logo */}
+          <div className="flex h-16 items-center gap-2 border-b border-gray-200 px-6 dark:border-gray-800">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-600 text-white text-sm font-bold">
+              S
+            </div>
+            <span className="text-lg font-bold tracking-tight text-gray-900 dark:text-white">
+              Scout AI
             </span>
           </div>
-        </div>
-      </aside>
 
-      {/* Main Content */}
-      <main className="ml-64 flex-1">
-        <div className="mx-auto max-w-6xl px-6 py-8">
-          <Outlet />
-        </div>
-      </main>
-    </div>
+          {/* Nav Links */}
+          <nav className="flex-1 overflow-y-auto px-3 py-4">
+            <ul className="space-y-1">
+              {navItems.map((item) => (
+                <li key={item.to}>
+                  <Link
+                    to={item.to}
+                    activeOptions={item.exact ? { exact: true } : undefined}
+                    className="group flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-gray-600 transition hover:bg-gray-100 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-white"
+                    activeProps={{
+                      className:
+                        "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium bg-indigo-50 text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300",
+                    }}
+                  >
+                    <item.icon />
+                    {item.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </nav>
+
+          {/* User Section */}
+          <div className="border-t border-gray-200 p-4 dark:border-gray-800">
+            <div className="flex items-center gap-3">
+              <UserButton
+                afterSignOutUrl="/"
+                appearance={{
+                  elements: {
+                    userButtonBox: "flex items-center",
+                  },
+                }}
+              />
+              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                Account
+              </span>
+            </div>
+          </div>
+        </aside>
+
+        {/* Main Content */}
+        <main className="ml-64 flex-1">
+          <div className="mx-auto max-w-6xl px-6 py-8">
+            <Outlet />
+          </div>
+        </main>
+      </div>
+    </ToastProvider>
   );
 }
 

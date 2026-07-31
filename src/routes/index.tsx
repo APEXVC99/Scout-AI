@@ -49,6 +49,12 @@ function Header({ businessName }: { businessName: string }) {
         </a>
         <nav className="flex items-center gap-4">
           <a
+            href="#how-it-works"
+            className="text-sm font-medium text-gray-600 transition hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
+          >
+            How it works
+          </a>
+          <a
             href="#pricing"
             className="text-sm font-medium text-gray-600 transition hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
           >
@@ -70,21 +76,21 @@ function Header({ businessName }: { businessName: string }) {
                 >
                   Sign In
                 </Link>
-                <a
-                  href="#waitlist"
-                  className="rounded-full bg-gray-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-gray-700 dark:bg-white dark:text-gray-900 dark:hover:bg-gray-200"
+                <Link
+                  to="/sign-up"
+                  className="rounded-full bg-indigo-600 px-5 py-2 text-sm font-semibold text-white transition hover:bg-indigo-500"
                 >
-                  Join waitlist
-                </a>
+                  Get Started Free
+                </Link>
               </>
             )
           ) : (
-            <a
-              href="#waitlist"
-              className="rounded-full bg-gray-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-gray-700 dark:bg-white dark:text-gray-900 dark:hover:bg-gray-200"
+            <Link
+              to="/sign-up"
+              className="rounded-full bg-indigo-600 px-5 py-2 text-sm font-semibold text-white transition hover:bg-indigo-500"
             >
-              Join waitlist
-            </a>
+              Get Started Free
+            </Link>
           )}
         </nav>
       </div>
@@ -94,6 +100,8 @@ function Header({ businessName }: { businessName: string }) {
 
 /* ── Hero ────────────────────────────────────────────────────────── */
 function Hero({ businessName }: { businessName: string }) {
+  const { isSignedIn, isLoaded } = useAuth();
+
   return (
     <section className="relative overflow-hidden px-6 pt-20 pb-24 sm:pt-28 sm:pb-32">
       {/* subtle gradient bloom */}
@@ -125,13 +133,23 @@ function Hero({ businessName }: { businessName: string }) {
         </p>
 
         <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
-          <a
-            href="#waitlist"
-            className="inline-flex items-center gap-2 rounded-xl bg-gray-900 px-6 py-3 text-base font-semibold text-white transition hover:bg-gray-800 dark:bg-white dark:text-gray-900 dark:hover:bg-gray-200"
-          >
-            Get early access
-            <ArrowRight />
-          </a>
+          {isLoaded && isSignedIn ? (
+            <Link
+              to="/app"
+              className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-6 py-3 text-base font-semibold text-white transition hover:bg-indigo-500 shadow-lg shadow-indigo-500/25"
+            >
+              Launch App
+              <ArrowRight />
+            </Link>
+          ) : (
+            <Link
+              to="/sign-up"
+              className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-6 py-3 text-base font-semibold text-white transition hover:bg-indigo-500 shadow-lg shadow-indigo-500/25"
+            >
+              Get Started Free
+              <ArrowRight />
+            </Link>
+          )}
           <a
             href="#how-it-works"
             className="inline-flex items-center gap-2 rounded-xl px-6 py-3 text-base font-medium text-gray-600 transition hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
