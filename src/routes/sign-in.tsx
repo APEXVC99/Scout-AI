@@ -18,8 +18,7 @@ function SignInPage() {
           </p>
         </div>
         <SignIn
-          path="/sign-in"
-          routing="path"
+          routing="virtual"
           signUpUrl="/sign-up"
           forceRedirectUrl="/app"
           appearance={{
