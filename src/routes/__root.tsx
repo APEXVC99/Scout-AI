@@ -4,6 +4,7 @@ import {
   Scripts,
   createRootRoute,
 } from "@tanstack/react-router";
+import { ClerkProvider } from "@clerk/tanstack-start";
 import type { ReactNode } from "react";
 
 import appCss from "~/styles/app.css?url";
@@ -43,9 +44,13 @@ export const Route = createRootRoute({
 
 function RootComponent() {
   return (
-    <RootDocument>
-      <Outlet />
-    </RootDocument>
+    <ClerkProvider
+      publishableKey={import.meta.env.VITE_CLERK_PUBLISHABLE_KEY ?? ""}
+    >
+      <RootDocument>
+        <Outlet />
+      </RootDocument>
+    </ClerkProvider>
   );
 }
 
