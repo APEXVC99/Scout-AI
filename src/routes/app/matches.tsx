@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { getMatches, updateMatchStatus, type MatchEntry } from "./-match-actions";
 import { generateMemo, checkMatchHasMemo } from "./-memo-actions";
+import { generateOutreach, checkMatchHasOutreach } from "./-outreach-actions";
 
 export const Route = createFileRoute("/app/matches")({
   loader: async () => {
@@ -50,6 +51,9 @@ function MatchesPage() {
   const [generatingMemo, setGeneratingMemo] = useState<string | null>(null);
   const [memoStates, setMemoStates] = useState<Record<string, "loading" | "exists" | null>>({});
   const [memoError, setMemoError] = useState<string | null>(null);
+  const [generatingOutreach, setGeneratingOutreach] = useState<string | null>(null);
+  const [outreachStates, setOutreachStates] = useState<Record<string, "loading" | "exists" | null>>({});
+  const [outreachError, setOutreachError] = useState<string | null>(null);
 
   const handleStatusChange = async (matchId: string, newStatus: string) => {
     try {
@@ -97,6 +101,34 @@ function MatchesPage() {
       }));
     } catch {
       setMemoStates((prev) => ({ ...prev, [matchId]: null }));
+    }
+  };
+
+  const handleGenerateOutreach = async (matchId: string) => {
+    setGeneratingOutreach(matchId);
+    setOutreachError(null);
+    try {
+      await generateOutreach({ data: { matchId } });
+      setOutreachStates((prev) => ({ ...prev, [matchId]: "exists" }));
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "Unknown error";
+      setOutreachError(msg);
+    } finally {
+      setGeneratingOutreach(null);
+    }
+  };
+
+  const checkHasOutreach = async (matchId: string) => {
+    if (outreachStates[matchId]) return;
+    try {
+      setOutreachStates((prev) => ({ ...prev, [matchId]: "loading" }));
+      const result = await checkMatchHasOutreach({ data: { matchId } });
+      setOutreachStates((prev) => ({
+        ...prev,
+        [matchId]: result.hasOutreach ? "exists" : null,
+      }));
+    } catch {
+      setOutreachStates((prev) => ({ ...prev, [matchId]: null }));
     }
   };
 
@@ -326,6 +358,73 @@ function MatchesPage() {
                   </div>
                   {memoError && (
                     <p className="mt-2 text-xs text-red-600 dark:text-red-400">{memoError}</p>
+                  )}
+                </div>
+
+                {/* Outreach Actions */}
+                <div className="mt-6">
+                  <h4 className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                    Outreach
+                  </h4>
+                  <div className="mt-2">
+                    {outreachStates[selectedMatch.id] === "exists" ? (
+                      <Link
+                        to="/app/outreach"
+                        className="inline-flex items-center rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-green-700"
+                      >
+                        View/Edit Outreach
+                      </Link>
+                    ) : memoStates[selectedMatch.id] !== "exists" ? (
+                      <p className="text-xs text-gray-400 dark:text-gray-500">
+                        Generate a memo first to unlock outreach
+                      </p>
+                    ) : (
+                      <button
+                        onClick={() => {
+                          void checkHasOutreach(selectedMatch.id).then(() => {
+                            if (outreachStates[selectedMatch.id] !== "exists") {
+                              void handleGenerateOutreach(selectedMatch.id);
+                            }
+                          });
+                        }}
+                        disabled={generatingOutreach === selectedMatch.id}
+                        className={`inline-flex items-center rounded-lg px-4 py-2 text-sm font-medium transition ${
+                          generatingOutreach === selectedMatch.id
+                            ? "cursor-not-allowed bg-gray-200 text-gray-500 dark:bg-gray-700 dark:text-gray-400"
+                            : "bg-green-600 text-white hover:bg-green-700"
+                        }`}
+                      >
+                        {generatingOutreach === selectedMatch.id ? (
+                          <>
+                            <svg
+                              className="mr-2 h-4 w-4 animate-spin"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                            >
+                              <circle
+                                className="opacity-25"
+                                cx="12"
+                                cy="12"
+                                r="10"
+                                stroke="currentColor"
+                                strokeWidth="4"
+                              />
+                              <path
+                                className="opacity-75"
+                                fill="currentColor"
+                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                              />
+                            </svg>
+                            Generating...
+                          </>
+                        ) : (
+                          "Generate Outreach"
+                        )}
+                      </button>
+                    )}
+                  </div>
+                  {outreachError && (
+                    <p className="mt-2 text-xs text-red-600 dark:text-red-400">{outreachError}</p>
                   )}
                 </div>
 
