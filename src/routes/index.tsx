@@ -1,5 +1,6 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { createServerFn } from "@tanstack/react-start";
+import { useAuth } from "@clerk/tanstack-start";
 import { readFile } from "node:fs/promises";
 import { useState } from "react";
 import { submitWaitlistEmail } from "./api/-waitlist";
@@ -38,6 +39,8 @@ function Home() {
 
 /* ── Header ─────────────────────────────────────────────────────── */
 function Header({ businessName }: { businessName: string }) {
+  const { isSignedIn, isLoaded } = useAuth();
+
   return (
     <header className="sticky top-0 z-50 border-b border-gray-100 bg-white/80 backdrop-blur-md dark:border-gray-800 dark:bg-gray-950/80">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
@@ -51,12 +54,38 @@ function Header({ businessName }: { businessName: string }) {
           >
             Pricing
           </a>
-          <a
-            href="#waitlist"
-            className="rounded-full bg-gray-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-gray-700 dark:bg-white dark:text-gray-900 dark:hover:bg-gray-200"
-          >
-            Join waitlist
-          </a>
+          {isLoaded ? (
+            isSignedIn ? (
+              <Link
+                to="/app"
+                className="rounded-full bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-indigo-500 dark:bg-indigo-500 dark:hover:bg-indigo-400"
+              >
+                Dashboard
+              </Link>
+            ) : (
+              <>
+                <Link
+                  to="/sign-in"
+                  className="text-sm font-medium text-gray-600 transition hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
+                >
+                  Sign In
+                </Link>
+                <a
+                  href="#waitlist"
+                  className="rounded-full bg-gray-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-gray-700 dark:bg-white dark:text-gray-900 dark:hover:bg-gray-200"
+                >
+                  Join waitlist
+                </a>
+              </>
+            )
+          ) : (
+            <a
+              href="#waitlist"
+              className="rounded-full bg-gray-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-gray-700 dark:bg-white dark:text-gray-900 dark:hover:bg-gray-200"
+            >
+              Join waitlist
+            </a>
+          )}
         </nav>
       </div>
     </header>
