@@ -82,6 +82,7 @@ async function getCurrentUserId(): Promise<string> {
 // ── Table creation helpers (idempotent) ──────────────────────────────
 
 async function ensureCompaniesTable() {
+  await sql()`CREATE EXTENSION IF NOT EXISTS vector`;
   await sql()`CREATE TABLE IF NOT EXISTS companies (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     name VARCHAR(500) NOT NULL,
@@ -96,10 +97,17 @@ async function ensureCompaniesTable() {
     last_funding VARCHAR(50),
     source VARCHAR(100),
     source_url TEXT,
+    embedding VECTOR(1536),
     metadata JSONB,
     discovered_at TIMESTAMPTZ NOT NULL DEFAULT now(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
   )`;
+  await sql()`ALTER TABLE companies ADD COLUMN IF NOT EXISTS embedding VECTOR(1536)`;
+  try {
+    await sql()`CREATE INDEX IF NOT EXISTS idx_companies_embedding ON companies USING hnsw (embedding vector_cosine_ops)`;
+  } catch {
+    // Index may already exist; that's fine
+  }
 }
 
 async function ensureAgentLogsTable() {
@@ -152,7 +160,7 @@ export const scanSources = createServerFn({ method: "POST" }).handler(async (): 
         `;
 
         if (existing.length === 0) {
-          await sql()`
+          const inserted = await sql()`
             INSERT INTO companies (name, description, source, source_url, metadata)
             VALUES (
               ${company.name},
@@ -161,8 +169,20 @@ export const scanSources = createServerFn({ method: "POST" }).handler(async (): 
               ${company.source_url},
               ${JSON.stringify(company.metadata ?? {})}::jsonb
             )
+            RETURNING id
           `;
+          const newId = inserted[0]?.id as string | undefined;
           newCompanies++;
+
+          // Auto-embed the new company (fire-and-forget; failures logged but don't block the scan)
+          if (newId) {
+            try {
+              const { embedAndStoreCompany } = await import("~/lib/embeddings");
+              await embedAndStoreCompany(newId);
+            } catch (embedErr) {
+              console.error(`Failed to embed company ${newId}:`, embedErr);
+            }
+          }
         }
       }
     }

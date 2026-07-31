@@ -66,6 +66,7 @@ async function getCurrentUserId(): Promise<string> {
 
 // Ensure the theses table exists (idempotent)
 async function ensureThesesTable() {
+  await sql()`CREATE EXTENSION IF NOT EXISTS vector`;
   await sql()`CREATE TABLE IF NOT EXISTS theses (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -76,10 +77,17 @@ async function ensureThesesTable() {
     geo_focus TEXT[] NOT NULL DEFAULT '{}',
     check_size VARCHAR(50),
     criteria_json JSONB,
+    embedding VECTOR(1536),
     is_active BOOLEAN NOT NULL DEFAULT true,
     created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
   )`;
+  await sql()`ALTER TABLE theses ADD COLUMN IF NOT EXISTS embedding VECTOR(1536)`;
+  try {
+    await sql()`CREATE INDEX IF NOT EXISTS idx_theses_embedding ON theses USING hnsw (embedding vector_cosine_ops)`;
+  } catch {
+    // Index may already exist; that's fine
+  }
 }
 
 // ── Server Functions ──────────────────────────────────────────────
@@ -147,6 +155,16 @@ export const createThesis = createServerFn({ method: "POST" })
     `;
 
     const r = rows[0];
+    const thesisId = r.id as string;
+
+    // Auto-embed the new thesis (fire-and-forget; failures logged but don't block create)
+    try {
+      const { embedAndStoreThesis } = await import("~/lib/embeddings");
+      await embedAndStoreThesis(thesisId);
+    } catch (embedErr) {
+      console.error(`Failed to embed thesis ${thesisId}:`, embedErr);
+    }
+
     return {
       ...r,
       created_at: String(r.created_at),
@@ -185,6 +203,15 @@ export const updateThesis = createServerFn({ method: "POST" })
     `;
 
     const r = rows[0];
+
+    // Re-embed the thesis (name/description/sectors/stages may have changed)
+    try {
+      const { embedAndStoreThesis } = await import("~/lib/embeddings");
+      await embedAndStoreThesis(data.id);
+    } catch (embedErr) {
+      console.error(`Failed to re-embed thesis ${data.id}:`, embedErr);
+    }
+
     return {
       ...r,
       created_at: String(r.created_at),
