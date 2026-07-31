@@ -64,6 +64,7 @@ function RootDocument({ children }: { children: ReactNode }) {
             }
           }
         `}} />
+        <script defer src="https://cloud.umami.is/script.js" data-website-id="6817ec81-cc23-4501-b405-dec5b77f011a"></script>
       </head>
       <body>
         {children}
