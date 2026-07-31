@@ -1,6 +1,7 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { getMatches, updateMatchStatus, type MatchEntry } from "./-match-actions";
+import { generateMemo, checkMatchHasMemo } from "./-memo-actions";
 
 export const Route = createFileRoute("/app/matches")({
   loader: async () => {
@@ -46,6 +47,9 @@ function MatchesPage() {
   const { matches: initialMatches } = Route.useLoaderData();
   const [matches, setMatches] = useState<MatchEntry[]>(initialMatches);
   const [selectedMatch, setSelectedMatch] = useState<MatchEntry | null>(null);
+  const [generatingMemo, setGeneratingMemo] = useState<string | null>(null);
+  const [memoStates, setMemoStates] = useState<Record<string, "loading" | "exists" | null>>({});
+  const [memoError, setMemoError] = useState<string | null>(null);
 
   const handleStatusChange = async (matchId: string, newStatus: string) => {
     try {
@@ -58,6 +62,41 @@ function MatchesPage() {
       }
     } catch (err) {
       console.error("Failed to update status:", err);
+    }
+  };
+
+  const handleGenerateMemo = async (matchId: string) => {
+    setGeneratingMemo(matchId);
+    setMemoError(null);
+    try {
+      await generateMemo({ data: { matchId } });
+      setMemoStates((prev) => ({ ...prev, [matchId]: "exists" }));
+      // Update match status locally
+      setMatches((prev) =>
+        prev.map((m) => (m.id === matchId ? { ...m, status: "reviewing" } : m)),
+      );
+      if (selectedMatch?.id === matchId) {
+        setSelectedMatch((prev) => (prev ? { ...prev, status: "reviewing" } : null));
+      }
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "Unknown error";
+      setMemoError(msg);
+    } finally {
+      setGeneratingMemo(null);
+    }
+  };
+
+  const checkHasMemo = async (matchId: string) => {
+    if (memoStates[matchId]) return;
+    try {
+      setMemoStates((prev) => ({ ...prev, [matchId]: "loading" }));
+      const result = await checkMatchHasMemo({ data: { matchId } });
+      setMemoStates((prev) => ({
+        ...prev,
+        [matchId]: result.hasMemo ? "exists" : null,
+      }));
+    } catch {
+      setMemoStates((prev) => ({ ...prev, [matchId]: null }));
     }
   };
 
@@ -224,6 +263,70 @@ function MatchesPage() {
                       </button>
                     ))}
                   </div>
+                </div>
+
+                {/* Memo Actions */}
+                <div className="mt-6">
+                  <h4 className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                    Deal Memo
+                  </h4>
+                  <div className="mt-2">
+                    {memoStates[selectedMatch.id] === "exists" ? (
+                      <Link
+                        to="/app/memos/$matchId"
+                        params={{ matchId: selectedMatch.id }}
+                        className="inline-flex items-center rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-indigo-700"
+                      >
+                        View Memo
+                      </Link>
+                    ) : (
+                      <button
+                        onClick={() => {
+                          void checkHasMemo(selectedMatch.id).then(() => {
+                            if (memoStates[selectedMatch.id] !== "exists") {
+                              void handleGenerateMemo(selectedMatch.id);
+                            }
+                          });
+                        }}
+                        disabled={generatingMemo === selectedMatch.id}
+                        className={`inline-flex items-center rounded-lg px-4 py-2 text-sm font-medium transition ${
+                          generatingMemo === selectedMatch.id
+                            ? "cursor-not-allowed bg-gray-200 text-gray-500 dark:bg-gray-700 dark:text-gray-400"
+                            : "bg-indigo-600 text-white hover:bg-indigo-700"
+                        }`}
+                      >
+                        {generatingMemo === selectedMatch.id ? (
+                          <>
+                            <svg
+                              className="mr-2 h-4 w-4 animate-spin"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                            >
+                              <circle
+                                className="opacity-25"
+                                cx="12"
+                                cy="12"
+                                r="10"
+                                stroke="currentColor"
+                                strokeWidth="4"
+                              />
+                              <path
+                                className="opacity-75"
+                                fill="currentColor"
+                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                              />
+                            </svg>
+                            Generating...
+                          </>
+                        ) : (
+                          "Generate Memo"
+                        )}
+                      </button>
+                    )}
+                  </div>
+                  {memoError && (
+                    <p className="mt-2 text-xs text-red-600 dark:text-red-400">{memoError}</p>
+                  )}
                 </div>
 
                 {/* Timestamps */}

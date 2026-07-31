@@ -1,11 +1,13 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { getMatchCount, getMatches, type MatchEntry } from "./-match-actions";
 import { getAllCompanies, type CompanyEntry } from "./-pipeline-actions";
+import { getMemoCount } from "./-memo-actions";
 
 export const Route = createFileRoute("/app/")({
   loader: async () => {
     let companies: CompanyEntry[] = [];
     let matchCount = 0;
+    let memoCount = 0;
     let topMatches: MatchEntry[] = [];
 
     try {
@@ -22,23 +24,30 @@ export const Route = createFileRoute("/app/")({
     }
 
     try {
+      const mm = await getMemoCount();
+      memoCount = mm.count;
+    } catch {
+      // keep defaults
+    }
+
+    try {
       topMatches = await getMatches({ data: { limit: 5 } });
     } catch {
       // keep defaults
     }
 
-    return { companies, matchCount, topMatches };
+    return { companies, matchCount, memoCount, topMatches };
   },
   component: DashboardHome,
 });
 
 function DashboardHome() {
-  const { companies, matchCount, topMatches } = Route.useLoaderData();
+  const { companies, matchCount, memoCount, topMatches } = Route.useLoaderData();
 
   const stats = [
     { label: "Tracked Companies", value: companies.length, icon: BuildingIcon },
     { label: "Matches", value: matchCount, icon: SparklesIcon },
-    { label: "Memos", value: 0, icon: DocumentIcon },
+    { label: "Memos", value: memoCount, icon: DocumentIcon },
   ];
 
   return (
