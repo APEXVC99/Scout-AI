@@ -61,11 +61,19 @@ function RootDocument({ children }: { children: ReactNode }) {
         <HeadContent />
         <style dangerouslySetInnerHTML={{__html: `
           body {
-            background: linear-gradient(180deg, #eff6ff 0%, #ffffff 40%, #f0f9ff 100%) !important;
+            background:
+              radial-gradient(1100px 520px at 85% -10%, rgba(168, 85, 247, 0.16), transparent 60%),
+              radial-gradient(900px 480px at 0% 0%, rgba(79, 70, 229, 0.2), transparent 55%),
+              radial-gradient(800px 600px at 50% 110%, rgba(6, 182, 212, 0.1), transparent 60%),
+              linear-gradient(180deg, #eef2ff 0%, #f5f3ff 32%, #ffffff 55%, #ecfeff 100%) !important;
           }
           @media (prefers-color-scheme: dark) {
             body {
-              background: linear-gradient(180deg, #0f172a 0%, #030712 40%, #0c1222 100%) !important;
+              background:
+                radial-gradient(1100px 520px at 85% -10%, rgba(168, 85, 247, 0.22), transparent 60%),
+                radial-gradient(900px 480px at 0% 0%, rgba(79, 70, 229, 0.28), transparent 55%),
+                radial-gradient(800px 600px at 50% 110%, rgba(6, 182, 212, 0.12), transparent 60%),
+                linear-gradient(180deg, #171431 0%, #0f0a2e 32%, #020617 60%, #04101f 100%) !important;
             }
           }
         `}} />

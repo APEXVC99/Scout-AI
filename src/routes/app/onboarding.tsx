@@ -230,7 +230,7 @@ function OnboardingPage() {
             <button
               onClick={handleStep1}
               disabled={step1Loading}
-              className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-indigo-700 disabled:opacity-50"
+              className="btn-gradient inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold disabled:opacity-50"
             >
               {step1Loading ? (
                 <>
@@ -269,7 +269,7 @@ function OnboardingPage() {
             <div className="flex flex-col items-center gap-4">
               <button
                 onClick={() => void handleStep2()}
-                className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-6 py-3 text-base font-semibold text-white transition hover:bg-indigo-700"
+                className="btn-gradient inline-flex items-center gap-2 rounded-xl px-6 py-3 text-base font-semibold"
               >
                 <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
@@ -313,7 +313,7 @@ function OnboardingPage() {
                   setStep(3);
                   void handleViewMatches();
                 }}
-                className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-indigo-700"
+                className="btn-gradient inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold"
               >
                 View Your Matches
               </button>
@@ -393,7 +393,7 @@ function OnboardingPage() {
             </button>
             <button
               onClick={() => void handleFinish()}
-              className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-indigo-700"
+              className="btn-gradient inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold"
             >
               Go to Dashboard
             </button>
