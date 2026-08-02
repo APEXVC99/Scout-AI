@@ -73,15 +73,16 @@ for (let attempt = 1; ; attempt++) {
         }
 
         // Serve public static pages before Clerk SSR so visitors can explore without auth.
-        if (pathname === "/" || pathname === "/demo") {
-          const page = Bun.file(CLIENT_DIR + (pathname === "/" ? "/landing.html" : "/demo.html"));
+        if (pathname === "/" || pathname === "/demo" || pathname === "/welcome") {
+          const pageName = pathname === "/" ? "/landing.html" : pathname === "/demo" ? "/demo.html" : "/welcome.html";
+          const page = Bun.file(CLIENT_DIR + pageName);
           if (await page.exists()) {
             return new Response(page, {
               headers: { "Content-Type": "text/html; charset=utf-8" },
             });
           }
         }
-        if (pathname !== "/" && pathname !== "/demo") {
+        if (pathname !== "/" && pathname !== "/demo" && pathname !== "/welcome") {
           const file = Bun.file(CLIENT_DIR + pathname);
           if (await file.exists()) return new Response(file);
         }
