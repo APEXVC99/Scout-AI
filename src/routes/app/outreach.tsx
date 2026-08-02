@@ -11,6 +11,7 @@ import {
 import { generateIntroStrategyFn, getIntroStrategy } from "./-intro-actions";
 import { IntroStrategyCard } from "~/components/IntroStrategyCard";
 import type { IntroStrategy } from "~/lib/intro";
+import { sendOutreach } from "./-email-actions";
 
 export const Route = createFileRoute("/app/outreach")({
   loader: async () => {
@@ -89,6 +90,20 @@ function OutreachPage() {
   const filteredCampaigns = activeFilter
     ? campaigns.filter((c) => c.status === activeFilter)
     : campaigns;
+
+  const handleSend = async (id: string) => {
+    setUpdating(id);
+    setError(null);
+    try {
+      const result = await sendOutreach({ data: { outreachId: id } });
+      if (!result.success) throw new Error(result.error || "Failed to send email");
+      setCampaigns((prev) => prev.map((c) => c.id === id ? { ...c, status: "sent" } : c));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to send email");
+    } finally {
+      setUpdating(null);
+    }
+  };
 
   const handleStatusChange = async (id: string, newStatus: string) => {
     setUpdating(id);
@@ -421,17 +436,22 @@ function OutreachPage() {
                               </>
                             )}
                             {campaign.status === "approved" && (
-                              <button
-                                onClick={() =>
-                                  handleStatusChange(campaign.id, "sent")
-                                }
-                                disabled={updating === campaign.id}
-                                className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-indigo-700 disabled:opacity-50"
-                              >
-                                {updating === campaign.id
-                                  ? "..."
-                                  : "Mark as Sent"}
-                              </button>
+                              <>
+                                <button
+                                  onClick={() => void handleSend(campaign.id)}
+                                  disabled={updating === campaign.id}
+                                  className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-indigo-700 disabled:opacity-50"
+                                >
+                                  {updating === campaign.id ? "Sending..." : "Send"}
+                                </button>
+                                <button
+                                  onClick={() => void handleStatusChange(campaign.id, "sent")}
+                                  disabled={updating === campaign.id}
+                                  className="rounded-lg bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700 disabled:opacity-50"
+                                >
+                                  Mark as Sent
+                                </button>
+                              </>
                             )}
                             {campaign.status !== "sent" && (
                               <button
