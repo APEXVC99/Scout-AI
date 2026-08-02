@@ -52,9 +52,7 @@ function Header({ businessName }: { businessName: string }) {
     <header className="sticky top-0 z-50 border-b border-indigo-100/70 bg-white/80 backdrop-blur-md dark:border-indigo-950 dark:bg-[#0d0826]/80">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
         <a href="#" className="flex items-center gap-2 text-lg font-bold tracking-tight">
-          <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-indigo-600 via-violet-600 to-fuchsia-500 text-sm font-bold text-white shadow-md shadow-indigo-500/30">
-            S
-          </span>
+          <img src="/logo.svg" alt="Scout AI" className="h-8 w-8" />
           <span className="text-gradient">{businessName}</span>
         </a>
         <nav className="flex items-center gap-4">
@@ -141,6 +139,7 @@ function Hero({ businessName }: { businessName: string }) {
       />
 
       <div className="relative mx-auto max-w-4xl text-center">
+        <img src="/logo.svg" alt="Scout AI" className="mx-auto mb-8 h-20 w-20" />
         <span className="mb-6 inline-flex items-center gap-2 rounded-full border border-indigo-200/80 bg-gradient-to-r from-indigo-50 via-violet-50 to-purple-50 px-4 py-1.5 text-sm font-medium text-indigo-700 shadow-sm dark:border-indigo-800/80 dark:from-indigo-950 dark:via-violet-950 dark:to-purple-950 dark:text-indigo-300">
           <span className="relative flex h-2 w-2">
             <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-gradient-to-r from-indigo-400 to-fuchsia-400 opacity-75" />
