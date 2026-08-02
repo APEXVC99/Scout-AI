@@ -36,7 +36,12 @@ export const Route = createRootRoute({
           "Scout AI deploys autonomous AI agents that source investment deals 24/7 — scraping databases, tracking founders, building memos, and sending outreach. Built for emerging VC funds and solo GPs.",
       },
     ],
-    links: [{ rel: "stylesheet", href: appCss }],
+    links: [
+      { rel: "stylesheet", href: appCss },
+      { rel: "icon", type: "image/svg+xml", href: "/favicon.svg" },
+      { rel: "icon", type: "image/x-icon", href: "/favicon.ico" },
+      { rel: "apple-touch-icon", href: "/favicon.ico" },
+    ],
   }),
   notFoundComponent: () => <div>Page not found</div>,
   component: RootComponent,
