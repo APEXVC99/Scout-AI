@@ -26,4 +26,32 @@ body{font-family:Inter,ui-sans-serif,system-ui}.bg-page{background:radial-gradie
 <section class="relative mx-auto mt-12 max-w-3xl rounded-2xl border border-indigo-100 bg-white/60 px-6 py-6 text-center backdrop-blur-sm"><p class="text-sm text-slate-600">Questions? Reply to your receipt email or contact <a href="mailto:hello@getscoutai.app" class="font-semibold text-indigo-600 hover:text-indigo-800">hello@getscoutai.app</a></p></section>
 </main>
 <footer class="border-t border-indigo-100/60 bg-white/40 px-6 py-7 text-center text-xs text-slate-400"><p>&copy; 2026 Scout AI · <a href="/terms" class="hover:text-slate-600">Terms</a> · <a href="/privacy" class="hover:text-slate-600">Privacy</a></p></footer>
+<script>
+(function(){
+var params = new URLSearchParams(window.location.search);
+var tier = params.get('tier') || '';
+var tiers = {
+solo:   { name:'Solo',   price:'$399/mo', theses:'3 theses',  agents:'1 agent',  companies:'50 companies',  color:'cyan' },
+studio: { name:'Studio', price:'$1,199/mo', theses:'10 theses', agents:'5 agents', companies:'300 companies', color:'violet' },
+firm:   { name:'Firm',   price:'$3,199/mo', theses:'unlimited theses', agents:'20+ agents', companies:'unlimited companies', color:'purple' }
+};
+var t = tiers[tier];
+if (t) {
+var sub = document.querySelector('section:first-of-type p:last-of-type');
+if (sub) sub.innerHTML = 'Your <span class="font-semibold text-'+t.color+'-700">'+t.name+'</span> subscription ('+t.price+') is active. Let\'s get you set up.';
+var step2 = document.querySelectorAll('article')[1];
+if (step2) {
+  var p = step2.querySelector('p');
+  if (p) p.innerHTML = 'Our 3-step wizard picks up your investment thesis and configures your workspace: <span class="font-semibold text-'+t.color+'-700">'+t.theses+'</span>, <span class="font-semibold text-'+t.color+'-700">'+t.agents+'</span>, tracking <span class="font-semibold text-'+t.color+'-700">'+t.companies+'</span>.';
+}
+var badge = document.querySelector('section:first-of-type .rounded-2xl');
+if (badge) {
+  var span = document.createElement('span');
+  span.className = 'mt-6 inline-block rounded-full bg-'+t.color+'-500 px-4 py-1.5 text-sm font-bold text-white shadow-md';
+  span.textContent = t.name + ' Plan';
+  badge.appendChild(span);
+}
+}
+})();
+</script>
 </body></html>
