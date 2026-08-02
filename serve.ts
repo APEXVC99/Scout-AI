@@ -72,16 +72,16 @@ for (let attempt = 1; ; attempt++) {
           }
         }
 
-        // Serve the static landing page for / (bypasses Clerk SSR)
-        if (pathname === "/") {
-          const landing = Bun.file(CLIENT_DIR + "/landing.html");
-          if (await landing.exists()) {
-            return new Response(landing, {
+        // Serve public static pages before Clerk SSR so visitors can explore without auth.
+        if (pathname === "/" || pathname === "/demo") {
+          const page = Bun.file(CLIENT_DIR + (pathname === "/" ? "/landing.html" : "/demo.html"));
+          if (await page.exists()) {
+            return new Response(page, {
               headers: { "Content-Type": "text/html; charset=utf-8" },
             });
           }
         }
-        if (pathname !== "/") {
+        if (pathname !== "/" && pathname !== "/demo") {
           const file = Bun.file(CLIENT_DIR + pathname);
           if (await file.exists()) return new Response(file);
         }
