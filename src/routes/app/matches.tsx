@@ -32,24 +32,24 @@ const STATUS_OPTIONS = [
 
 function scoreColor(score: number): string {
   if (score > 0.8)
-    return "text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-950";
+    return "text-emerald-800 dark:text-emerald-200 bg-emerald-100 dark:bg-emerald-900/70 border-2 border-emerald-300 dark:border-emerald-600 ring-2 ring-emerald-200/60 dark:ring-emerald-800/60";
   if (score > 0.6)
-    return "text-yellow-600 dark:text-yellow-400 bg-yellow-50 dark:bg-yellow-950";
-  return "text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950";
+    return "text-amber-800 dark:text-amber-200 bg-amber-100 dark:bg-amber-900/70 border-2 border-amber-300 dark:border-amber-600 ring-2 ring-amber-200/60 dark:ring-amber-800/60";
+  return "text-rose-800 dark:text-rose-200 bg-rose-100 dark:bg-rose-900/70 border-2 border-rose-300 dark:border-rose-600 ring-2 ring-rose-200/60 dark:ring-rose-800/60";
 }
 
 function statusBadgeClass(status: string): string {
   switch (status) {
     case "new":
-      return "bg-blue-50 text-blue-700 dark:bg-blue-950 dark:text-blue-300";
+      return "bg-blue-100 text-blue-800 border border-blue-300 dark:bg-blue-900/70 dark:text-blue-200 dark:border-blue-700";
     case "reviewing":
-      return "bg-yellow-50 text-yellow-700 dark:bg-yellow-950 dark:text-yellow-300";
+      return "bg-amber-100 text-amber-800 border border-amber-300 dark:bg-amber-900/70 dark:text-amber-200 dark:border-amber-700";
     case "interested":
-      return "bg-green-50 text-green-700 dark:bg-green-950 dark:text-green-300";
+      return "bg-emerald-100 text-emerald-800 border border-emerald-300 dark:bg-emerald-900/70 dark:text-emerald-200 dark:border-emerald-700";
     case "passed":
-      return "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400";
+      return "bg-gray-100 text-gray-700 border border-gray-300 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-700";
     default:
-      return "bg-gray-50 text-gray-600 dark:bg-gray-800 dark:text-gray-400";
+      return "bg-gray-50 text-gray-600 border border-gray-200 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-700";
   }
 }
 
@@ -225,7 +225,7 @@ function MatchesPage() {
           <div className="lg:col-span-2">
             <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900">
               <table className="w-full text-left text-sm">
-                <thead className="border-b border-gray-200 bg-gray-50 dark:border-gray-800 dark:bg-gray-800/50">
+                <thead className="border-b border-indigo-100/70 bg-gradient-to-r from-indigo-50/80 via-violet-50/50 to-transparent dark:border-indigo-950 dark:from-indigo-950/60 dark:via-violet-950/40 dark:to-transparent">
                   <tr>
                     <th className="px-4 py-3 font-medium text-gray-600 dark:text-gray-400">
                       Company
@@ -267,14 +267,14 @@ function MatchesPage() {
                       </td>
                       <td className="px-4 py-3">
                         <span
-                          className={`inline-flex items-center rounded-md px-2 py-1 text-xs font-semibold ${scoreColor(m.score)}`}
+                          className={`inline-flex items-center rounded-lg px-2 py-1 text-xs font-bold ${scoreColor(m.score)}`}
                         >
                           {(m.score * 100).toFixed(0)}%
                         </span>
                       </td>
                       <td className="px-4 py-3 hidden md:table-cell">
                         <span
-                          className={`inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ${statusBadgeClass(m.status)}`}
+                          className={`inline-flex items-center rounded-md px-2 py-1 text-xs font-semibold ${statusBadgeClass(m.status)}`}
                         >
                           {STATUS_OPTIONS.find((s) => s.value === m.status)
                             ?.label ?? m.status}

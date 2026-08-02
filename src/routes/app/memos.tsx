@@ -17,15 +17,15 @@ function recommendationBadgeClass(recommendation: string): string {
   switch (recommendation.toLowerCase()) {
     case "strong_buy":
     case "strong buy":
-      return "bg-green-50 text-green-700 dark:bg-green-950 dark:text-green-300";
+      return "bg-emerald-100 text-emerald-800 border border-emerald-300 dark:bg-emerald-900/70 dark:text-emerald-200 dark:border-emerald-700";
     case "buy":
-      return "bg-blue-50 text-blue-700 dark:bg-blue-950 dark:text-blue-300";
+      return "bg-blue-100 text-blue-800 border border-blue-300 dark:bg-blue-900/70 dark:text-blue-200 dark:border-blue-700";
     case "hold":
-      return "bg-yellow-50 text-yellow-700 dark:bg-yellow-950 dark:text-yellow-300";
+      return "bg-amber-100 text-amber-800 border border-amber-300 dark:bg-amber-900/70 dark:text-amber-200 dark:border-amber-700";
     case "pass":
-      return "bg-red-50 text-red-700 dark:bg-red-950 dark:text-red-300";
+      return "bg-rose-100 text-rose-800 border border-rose-300 dark:bg-rose-900/70 dark:text-rose-200 dark:border-rose-700";
     default:
-      return "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400";
+      return "bg-gray-100 text-gray-700 border border-gray-300 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-700";
   }
 }
 
@@ -97,7 +97,7 @@ function MemosListPage() {
           </p>
           <Link
             to="/app/matches"
-            className="mt-4 inline-flex items-center rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-indigo-700"
+            className="btn-gradient mt-4 inline-flex items-center rounded-lg px-4 py-2 text-sm font-medium"
           >
             View Matches
           </Link>
@@ -105,7 +105,7 @@ function MemosListPage() {
       ) : (
         <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900">
           <table className="w-full text-left text-sm">
-            <thead className="border-b border-gray-200 bg-gray-50 dark:border-gray-800 dark:bg-gray-800/50">
+            <thead className="border-b border-indigo-100/70 bg-gradient-to-r from-indigo-50/80 via-violet-50/50 to-transparent dark:border-indigo-950 dark:from-indigo-950/60 dark:via-violet-950/40 dark:to-transparent">
               <tr>
                 <th className="px-4 py-3 font-medium text-gray-600 dark:text-gray-400">
                   Company

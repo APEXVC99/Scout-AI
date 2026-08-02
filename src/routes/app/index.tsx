@@ -83,10 +83,10 @@ function DashboardHome() {
   };
 
   const stats = [
-    { label: "Theses", value: thesisCount, icon: FileIcon },
-    { label: "Tracked Companies", value: companies.length, icon: BuildingIcon },
-    { label: "Matches", value: matchCount, icon: SparklesIcon },
-    { label: "Memos", value: memoCount, icon: DocumentIcon },
+    { label: "Theses", value: thesisCount, icon: FileIcon, accent: { border: "border-l-indigo-500", chip: "bg-indigo-100 text-indigo-600 dark:bg-indigo-950 dark:text-indigo-400", glow: "from-indigo-500/20" } },
+    { label: "Tracked Companies", value: companies.length, icon: BuildingIcon, accent: { border: "border-l-cyan-500", chip: "bg-cyan-100 text-cyan-600 dark:bg-cyan-950 dark:text-cyan-400", glow: "from-cyan-500/20" } },
+    { label: "Matches", value: matchCount, icon: SparklesIcon, accent: { border: "border-l-fuchsia-500", chip: "bg-fuchsia-100 text-fuchsia-600 dark:bg-fuchsia-950 dark:text-fuchsia-400", glow: "from-fuchsia-500/20" } },
+    { label: "Memos", value: memoCount, icon: DocumentIcon, accent: { border: "border-l-emerald-500", chip: "bg-emerald-100 text-emerald-600 dark:bg-emerald-950 dark:text-emerald-400", glow: "from-emerald-500/20" } },
   ];
 
   const needsSetup = thesisCount === 0 && companies.length === 0 && matchCount === 0;
@@ -107,7 +107,7 @@ function DashboardHome() {
           <button
             onClick={() => void handleSeedDemo()}
             disabled={seedingDemo}
-            className="inline-flex items-center gap-2 rounded-xl border border-indigo-200 bg-indigo-50 px-4 py-2 text-sm font-medium text-indigo-700 transition hover:bg-indigo-100 dark:border-indigo-800 dark:bg-indigo-950 dark:text-indigo-300 dark:hover:bg-indigo-900"
+            className="btn-gradient inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-medium"
           >
             <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.455 2.456L21.75 6l-1.036.259a3.375 3.375 0 00-2.455 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z" />
@@ -166,9 +166,10 @@ function DashboardHome() {
       )}
 
       {/* Welcome Message */}
-      <div className="mb-8 rounded-2xl border border-indigo-200 bg-indigo-50 p-6 dark:border-indigo-800 dark:bg-indigo-950">
-        <div className="flex items-start gap-4">
-          <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-indigo-100 dark:bg-indigo-900">
+      <div className="relative mb-8 overflow-hidden rounded-2xl border border-indigo-200/70 bg-gradient-to-r from-indigo-50 via-violet-50 to-fuchsia-50 p-6 dark:border-indigo-800 dark:from-indigo-950 dark:via-violet-950 dark:to-purple-950">
+        <div className="pointer-events-none absolute -right-8 -top-10 h-32 w-32 rounded-full bg-gradient-to-br from-violet-300/30 to-cyan-300/30 blur-2xl" />
+        <div className="relative flex items-start gap-4">
+          <div className="icon-chip-gradient flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl">
             <WaveIcon />
           </div>
           <div>
@@ -189,10 +190,15 @@ function DashboardHome() {
         {stats.map((stat) => (
           <div
             key={stat.label}
-            className="rounded-2xl border border-gray-200 bg-white p-6 transition hover:shadow-md dark:border-gray-800 dark:bg-gray-900"
+            className={`card-lift relative overflow-hidden rounded-2xl border border-gray-200 border-l-4 bg-white p-6 dark:border-gray-800 dark:bg-gray-900 ${stat.accent.border}`}
           >
-            <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gray-100 dark:bg-gray-800">
+            <div
+              className={`pointer-events-none absolute -right-6 -top-6 h-24 w-24 rounded-full bg-gradient-to-br to-transparent blur-xl ${stat.accent.glow}`}
+            />
+            <div className="relative flex items-center gap-3">
+              <div
+                className={`flex h-10 w-10 items-center justify-center rounded-xl ${stat.accent.chip}`}
+              >
                 <stat.icon />
               </div>
               <div>
@@ -251,7 +257,7 @@ function DashboardHome() {
         ) : (
           <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900">
             <table className="w-full text-left text-sm">
-              <thead className="border-b border-gray-200 bg-gray-50 dark:border-gray-800 dark:bg-gray-800/50">
+              <thead className="border-b border-indigo-100/70 bg-gradient-to-r from-indigo-50/80 via-violet-50/50 to-transparent dark:border-indigo-950 dark:from-indigo-950/60 dark:via-violet-950/40 dark:to-transparent">
                 <tr>
                   <th className="px-4 py-3 font-medium text-gray-600 dark:text-gray-400">Company</th>
                   <th className="px-4 py-3 font-medium text-gray-600 dark:text-gray-400 hidden sm:table-cell">
@@ -281,12 +287,12 @@ function DashboardHome() {
                     </td>
                     <td className="px-4 py-3">
                       <span
-                        className={`inline-flex items-center rounded-md px-2 py-1 text-xs font-semibold ${
+                        className={`inline-flex items-center rounded-lg border-2 px-2 py-0.5 text-xs font-bold ${
                           m.score > 0.8
-                            ? "bg-green-50 text-green-700 dark:bg-green-950 dark:text-green-300"
+                            ? "border-emerald-300 bg-emerald-100 text-emerald-800 ring-2 ring-emerald-200/60 dark:border-emerald-600 dark:bg-emerald-900/70 dark:text-emerald-200 dark:ring-emerald-800/60"
                             : m.score > 0.6
-                              ? "bg-yellow-50 text-yellow-700 dark:bg-yellow-950 dark:text-yellow-300"
-                              : "bg-red-50 text-red-700 dark:bg-red-950 dark:text-red-300"
+                              ? "border-amber-300 bg-amber-100 text-amber-800 ring-2 ring-amber-200/60 dark:border-amber-600 dark:bg-amber-900/70 dark:text-amber-200 dark:ring-amber-800/60"
+                              : "border-rose-300 bg-rose-100 text-rose-800 ring-2 ring-rose-200/60 dark:border-rose-600 dark:bg-rose-900/70 dark:text-rose-200 dark:ring-rose-800/60"
                         }`}
                       >
                         {(m.score * 100).toFixed(0)}%

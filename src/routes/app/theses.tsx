@@ -23,8 +23,24 @@ const STAGE_COLORS: Record<string, string> = {
   "growth": "bg-rose-50 text-rose-700 dark:bg-rose-950 dark:text-rose-300",
 };
 
-const SECTOR_COLORS =
-  "bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300";
+const SECTOR_PALETTE = [
+  "bg-indigo-100 text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300",
+  "bg-violet-100 text-violet-700 dark:bg-violet-950 dark:text-violet-300",
+  "bg-cyan-100 text-cyan-700 dark:bg-cyan-950 dark:text-cyan-300",
+  "bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300",
+  "bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-300",
+  "bg-rose-100 text-rose-700 dark:bg-rose-950 dark:text-rose-300",
+  "bg-fuchsia-100 text-fuchsia-700 dark:bg-fuchsia-950 dark:text-fuchsia-300",
+  "bg-sky-100 text-sky-700 dark:bg-sky-950 dark:text-sky-300",
+];
+
+function sectorColor(sector: string): string {
+  let hash = 0;
+  for (let i = 0; i < sector.length; i++) {
+    hash = (hash * 31 + sector.charCodeAt(i)) >>> 0;
+  }
+  return SECTOR_PALETTE[hash % SECTOR_PALETTE.length];
+}
 
 function ThesesPage() {
   const { theses: initialTheses, error } = Route.useLoaderData();
@@ -59,7 +75,7 @@ function ThesesPage() {
         </div>
         <Link
           to="/app/theses/new"
-          className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-indigo-700 active:bg-indigo-800"
+          className="btn-gradient inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold"
         >
           <PlusIcon />
           Create Thesis
@@ -106,8 +122,16 @@ function ThesesPage() {
           {theses.map((thesis) => (
             <div
               key={thesis.id}
-              className="group relative rounded-2xl border border-gray-200 bg-white p-6 transition hover:shadow-md dark:border-gray-800 dark:bg-gray-900"
+              className="card-lift group relative overflow-hidden rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-gray-900"
             >
+              {/* gradient top accent */}
+              <div
+                className={`absolute inset-x-0 top-0 h-1 bg-gradient-to-r ${
+                  thesis.is_active
+                    ? "from-indigo-500 via-violet-500 to-fuchsia-500"
+                    : "from-gray-300 to-gray-400 dark:from-gray-700 dark:to-gray-600"
+                }`}
+              />
               {/* Status dot */}
               <div className="mb-3 flex items-center gap-2">
                 <span
@@ -140,7 +164,7 @@ function ThesesPage() {
                   {thesis.sectors.map((s) => (
                     <span
                       key={s}
-                      className={`inline-block rounded-md px-2 py-0.5 text-xs font-medium ${SECTOR_COLORS}`}
+                      className={`inline-block rounded-md px-2 py-0.5 text-xs font-semibold ${sectorColor(s)}`}
                     >
                       {s}
                     </span>
@@ -154,8 +178,9 @@ function ThesesPage() {
                   {thesis.stages.map((s) => (
                     <span
                       key={s}
-                      className={`inline-block rounded-md px-2 py-0.5 text-xs font-medium ${
-                        STAGE_COLORS[s.toLowerCase()] ?? SECTOR_COLORS
+                      className={`inline-block rounded-md px-2 py-0.5 text-xs font-semibold ${
+                        STAGE_COLORS[s.toLowerCase()] ??
+                        "bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300"
                       }`}
                     >
                       {s}

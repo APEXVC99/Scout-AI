@@ -23,6 +23,23 @@ export const Route = createFileRoute("/app/pipeline")({
   component: PipelinePage,
 });
 
+const SOURCE_PALETTE = [
+  "bg-indigo-100 text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300",
+  "bg-violet-100 text-violet-700 dark:bg-violet-950 dark:text-violet-300",
+  "bg-cyan-100 text-cyan-700 dark:bg-cyan-950 dark:text-cyan-300",
+  "bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300",
+  "bg-fuchsia-100 text-fuchsia-700 dark:bg-fuchsia-950 dark:text-fuchsia-300",
+  "bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-300",
+];
+
+function sourceColor(source: string): string {
+  let hash = 0;
+  for (let i = 0; i < source.length; i++) {
+    hash = (hash * 31 + source.charCodeAt(i)) >>> 0;
+  }
+  return SOURCE_PALETTE[hash % SOURCE_PALETTE.length];
+}
+
 function PipelinePage() {
   const { companies: initialCompanies, scans: initialScans } = Route.useLoaderData();
 
@@ -71,7 +88,9 @@ function PipelinePage() {
         <button
           onClick={handleScan}
           disabled={scanning}
-          className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-50"
+          className={`btn-gradient inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold ${
+            scanning ? "scan-progress" : ""
+          }`}
         >
           {scanning ? (
             <>
@@ -152,7 +171,7 @@ function PipelinePage() {
           ) : (
             <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900">
               <table className="w-full text-left text-sm">
-                <thead className="border-b border-gray-200 bg-gray-50 dark:border-gray-800 dark:bg-gray-800/50">
+                <thead className="border-b border-indigo-100/70 bg-gradient-to-r from-indigo-50/80 via-violet-50/50 to-transparent dark:border-indigo-950 dark:from-indigo-950/60 dark:via-violet-950/40 dark:to-transparent">
                   <tr>
                     <th className="px-4 py-3 font-medium text-gray-600 dark:text-gray-400">Company</th>
                     <th className="px-4 py-3 font-medium text-gray-600 dark:text-gray-400">Source</th>
@@ -171,7 +190,7 @@ function PipelinePage() {
                         )}
                       </td>
                       <td className="px-4 py-3">
-                        <span className="inline-flex items-center rounded-md bg-indigo-50 px-2 py-1 text-xs font-medium text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300">
+                        <span className={`inline-flex items-center rounded-md px-2 py-1 text-xs font-semibold ${sourceColor(c.source)}`}>
                           {c.source}
                         </span>
                       </td>
