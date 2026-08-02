@@ -70,6 +70,12 @@ function Header({ businessName }: { businessName: string }) {
           >
             Pricing
           </a>
+          <a
+            href="/blog"
+            className="text-sm font-medium text-gray-600 transition hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
+          >
+            Blog
+          </a>
           {isLoaded ? (
             isSignedIn ? (
               <Link
@@ -650,6 +656,9 @@ function Footer({ businessName }: { businessName: string }) {
       <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 text-sm text-gray-400 dark:text-gray-600 sm:flex-row">
         <p>&copy; {new Date().getFullYear()} {businessName}. All rights reserved.</p>
         <nav className="flex gap-6">
+          <a href="/blog" className="hover:text-gray-600 dark:hover:text-gray-400">
+            Blog
+          </a>
           <a href="/terms" className="hover:text-gray-600 dark:hover:text-gray-400">
             Terms of Service
           </a>
