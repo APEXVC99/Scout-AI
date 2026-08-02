@@ -5,8 +5,12 @@ import {
   updateOutreachStatusFn,
   updateOutreachFn,
   deleteOutreachFn,
+  generateOutreach,
   type OutreachCampaign,
 } from "./-outreach-actions";
+import { generateIntroStrategyFn, getIntroStrategy } from "./-intro-actions";
+import { IntroStrategyCard } from "~/components/IntroStrategyCard";
+import type { IntroStrategy } from "~/lib/intro";
 
 export const Route = createFileRoute("/app/outreach")({
   loader: async () => {
@@ -54,7 +58,8 @@ function formatDate(dateStr: string): string {
 
 function OutreachPage() {
   const { campaigns: initialCampaigns } = Route.useLoaderData();
-  const [campaigns, setCampaigns] = useState<OutreachCampaign[]>(initialCampaigns);
+  const [campaigns, setCampaigns] =
+    useState<OutreachCampaign[]>(initialCampaigns);
   const [activeFilter, setActiveFilter] = useState("");
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -62,6 +67,24 @@ function OutreachPage() {
   const [editBody, setEditBody] = useState("");
   const [updating, setUpdating] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [strategyMap, setStrategyMap] = useState<Record<string, IntroStrategy>>(
+    {},
+  );
+  const [strategyFetched, setStrategyFetched] = useState<
+    Record<string, boolean>
+  >({});
+  const [strategyGenerating, setStrategyGenerating] = useState<
+    Record<string, boolean>
+  >({});
+  const [strategyOutreachGenerating, setStrategyOutreachGenerating] = useState<
+    Record<string, boolean>
+  >({});
+  const [strategyOutreachReady, setStrategyOutreachReady] = useState<
+    Record<string, boolean>
+  >({});
+  const [strategyError, setStrategyError] = useState<
+    Record<string, string | null>
+  >({});
 
   const filteredCampaigns = activeFilter
     ? campaigns.filter((c) => c.status === activeFilter)
@@ -83,7 +106,8 @@ function OutreachPage() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this outreach draft?")) return;
+    if (!confirm("Are you sure you want to delete this outreach draft?"))
+      return;
     setUpdating(id);
     setError(null);
     try {
@@ -114,7 +138,9 @@ function OutreachPage() {
     setUpdating(id);
     setError(null);
     try {
-      await updateOutreachFn({ data: { id, subject: editSubject, body: editBody } });
+      await updateOutreachFn({
+        data: { id, subject: editSubject, body: editBody },
+      });
       setCampaigns((prev) =>
         prev.map((c) =>
           c.id === id ? { ...c, subject: editSubject, body: editBody } : c,
@@ -128,8 +154,58 @@ function OutreachPage() {
     }
   };
 
+  const ensureStrategyLoaded = async (matchId: string) => {
+    if (strategyFetched[matchId]) return;
+    setStrategyFetched((prev) => ({ ...prev, [matchId]: true }));
+    try {
+      const result = await getIntroStrategy({ data: { matchId } });
+      if (result.strategy) {
+        setStrategyMap((prev) => ({ ...prev, [matchId]: result.strategy! }));
+      }
+    } catch {
+      // No strategy exists yet — the card will show the generate button.
+    }
+  };
+
+  const handleGenerateStrategy = async (matchId: string) => {
+    setStrategyGenerating((prev) => ({ ...prev, [matchId]: true }));
+    setStrategyError((prev) => ({ ...prev, [matchId]: null }));
+    try {
+      const result = await generateIntroStrategyFn({ data: { matchId } });
+      setStrategyMap((prev) => ({ ...prev, [matchId]: result.strategy! }));
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "Unknown error";
+      setStrategyError((prev) => ({ ...prev, [matchId]: msg }));
+    } finally {
+      setStrategyGenerating((prev) => ({ ...prev, [matchId]: false }));
+    }
+  };
+
+  const handleGenerateOutreachFromStrategy = async (matchId: string) => {
+    setStrategyOutreachGenerating((prev) => ({ ...prev, [matchId]: true }));
+    setStrategyError((prev) => ({ ...prev, [matchId]: null }));
+    try {
+      await generateOutreach({ data: { matchId } });
+      setStrategyOutreachReady((prev) => ({ ...prev, [matchId]: true }));
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "Unknown error";
+      setStrategyError((prev) => ({ ...prev, [matchId]: msg }));
+    } finally {
+      setStrategyOutreachGenerating((prev) => ({ ...prev, [matchId]: false }));
+    }
+  };
+
   const toggleExpand = (id: string) => {
-    setExpandedId((prev) => (prev === id ? null : id));
+    setExpandedId((prev) => {
+      const next = prev === id ? null : id;
+      if (next) {
+        const campaign = campaigns.find((c) => c.id === id);
+        if (campaign?.matchId) {
+          void ensureStrategyLoaded(campaign.matchId);
+        }
+      }
+      return next;
+    });
   };
 
   // Re-fetch with filters
@@ -154,7 +230,8 @@ function OutreachPage() {
           Outreach
         </h1>
         <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-          AI-generated personalized emails to founders — review, edit, and approve before sending
+          AI-generated personalized emails to founders — review, edit, and
+          approve before sending
         </p>
       </div>
 
@@ -179,7 +256,8 @@ function OutreachPage() {
             No Outreach Yet
           </h2>
           <p className="mt-2 max-w-md text-sm text-gray-500 dark:text-gray-400">
-            Generate an email from a high-match company. Go to Matches or Memos and click "Generate Outreach."
+            Generate an email from a high-match company. Go to Matches or Memos
+            and click "Generate Outreach."
           </p>
         </div>
       ) : (
@@ -228,7 +306,8 @@ function OutreachPage() {
                         <span
                           className={`inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium ${statusBadgeClass(campaign.status)}`}
                         >
-                          {campaign.status.charAt(0).toUpperCase() + campaign.status.slice(1)}
+                          {campaign.status.charAt(0).toUpperCase() +
+                            campaign.status.slice(1)}
                         </span>
                       </div>
                       <p className="mt-0.5 truncate text-sm text-gray-500 dark:text-gray-400">
@@ -331,7 +410,9 @@ function OutreachPage() {
                                   Edit
                                 </button>
                                 <button
-                                  onClick={() => handleStatusChange(campaign.id, "approved")}
+                                  onClick={() =>
+                                    handleStatusChange(campaign.id, "approved")
+                                  }
                                   disabled={updating === campaign.id}
                                   className="rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-green-700 disabled:opacity-50"
                                 >
@@ -341,11 +422,15 @@ function OutreachPage() {
                             )}
                             {campaign.status === "approved" && (
                               <button
-                                onClick={() => handleStatusChange(campaign.id, "sent")}
+                                onClick={() =>
+                                  handleStatusChange(campaign.id, "sent")
+                                }
                                 disabled={updating === campaign.id}
                                 className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-indigo-700 disabled:opacity-50"
                               >
-                                {updating === campaign.id ? "..." : "Mark as Sent"}
+                                {updating === campaign.id
+                                  ? "..."
+                                  : "Mark as Sent"}
                               </button>
                             )}
                             {campaign.status !== "sent" && (
@@ -359,6 +444,31 @@ function OutreachPage() {
                             )}
                           </div>
                         </>
+                      )}
+
+                      {/* Intro Strategy — expandable section */}
+                      {campaign.matchId && (
+                        <div className="mt-6 border-t border-gray-200 pt-4 dark:border-gray-800">
+                          <IntroStrategyCard
+                            strategy={strategyMap[campaign.matchId] ?? null}
+                            loading={!!strategyGenerating[campaign.matchId]}
+                            onGenerate={() =>
+                              void handleGenerateStrategy(campaign.matchId!)
+                            }
+                            onGenerateOutreach={() =>
+                              void handleGenerateOutreachFromStrategy(
+                                campaign.matchId!,
+                              )
+                            }
+                            outreachGenerating={
+                              !!strategyOutreachGenerating[campaign.matchId]
+                            }
+                            outreachReady={
+                              !!strategyOutreachReady[campaign.matchId]
+                            }
+                            error={strategyError[campaign.matchId] ?? null}
+                          />
+                        </div>
                       )}
                     </div>
                   )}
