@@ -1,12 +1,24 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { getExistingMemo, type DealMemoData } from "./-memo-actions";
-import { generateOutreach, checkMatchHasOutreach, getOutreachForMatchFn } from "./-outreach-actions";
+import {
+  generateOutreach,
+  checkMatchHasOutreach,
+  getOutreachForMatchFn,
+} from "./-outreach-actions";
+import { generateAnalysis, getAnalysis } from "./-analysis-actions";
+import { generateIntroStrategyFn, getIntroStrategy } from "./-intro-actions";
+import { AnalysisCard } from "~/components/AnalysisCard";
+import { IntroStrategyCard } from "~/components/IntroStrategyCard";
+import type { ThesisAnalysis } from "~/lib/analysis";
+import type { IntroStrategy } from "~/lib/intro";
 
 export const Route = createFileRoute("/app/memos/$matchId")({
   loader: async ({ params }) => {
     try {
-      const result = await getExistingMemo({ data: { matchId: params.matchId } });
+      const result = await getExistingMemo({
+        data: { matchId: params.matchId },
+      });
       return { memo: result.memo };
     } catch {
       return { memo: null as DealMemoData | null };
@@ -92,7 +104,10 @@ function renderMemoContent(markdown: string): React.ReactNode {
     const h1Match = line.match(/^# (.+)/);
     if (h1Match) {
       elements.push(
-        <h2 key={key++} className="mt-8 mb-3 text-xl font-bold text-gray-900 dark:text-white">
+        <h2
+          key={key++}
+          className="mt-8 mb-3 text-xl font-bold text-gray-900 dark:text-white"
+        >
           {h1Match[1]}
         </h2>,
       );
@@ -103,7 +118,10 @@ function renderMemoContent(markdown: string): React.ReactNode {
     const h2Match = line.match(/^## (.+)/);
     if (h2Match) {
       elements.push(
-        <h3 key={key++} className="mt-6 mb-2 text-lg font-semibold text-gray-900 dark:text-white">
+        <h3
+          key={key++}
+          className="mt-6 mb-2 text-lg font-semibold text-gray-900 dark:text-white"
+        >
           {h2Match[1]}
         </h3>,
       );
@@ -114,7 +132,10 @@ function renderMemoContent(markdown: string): React.ReactNode {
     const h3Match = line.match(/^### (.+)/);
     if (h3Match) {
       elements.push(
-        <h4 key={key++} className="mt-4 mb-2 text-base font-medium text-gray-900 dark:text-white">
+        <h4
+          key={key++}
+          className="mt-4 mb-2 text-base font-medium text-gray-900 dark:text-white"
+        >
           {h3Match[1]}
         </h4>,
       );
@@ -128,7 +149,10 @@ function renderMemoContent(markdown: string): React.ReactNode {
       while (i < lines.length && lines[i]?.match(/^[\s]*[-*]\s/)) {
         const itemText = lines[i]!.replace(/^[\s]*[-*]\s/, "");
         listItems.push(
-          <li key={key++} className="ml-4 list-disc text-sm text-gray-700 dark:text-gray-300">
+          <li
+            key={key++}
+            className="ml-4 list-disc text-sm text-gray-700 dark:text-gray-300"
+          >
             {renderInlineMarkdown(itemText)}
           </li>,
         );
@@ -148,7 +172,10 @@ function renderMemoContent(markdown: string): React.ReactNode {
       while (i < lines.length && lines[i]?.match(/^[\s]*\d+\.\s/)) {
         const itemText = lines[i]!.replace(/^[\s]*\d+\.\s/, "");
         listItems.push(
-          <li key={key++} className="ml-4 list-decimal text-sm text-gray-700 dark:text-gray-300">
+          <li
+            key={key++}
+            className="ml-4 list-decimal text-sm text-gray-700 dark:text-gray-300"
+          >
             {renderInlineMarkdown(itemText)}
           </li>,
         );
@@ -186,7 +213,10 @@ function renderMemoContent(markdown: string): React.ReactNode {
     if (line.match(/^\*\*.*\*\*$/)) {
       const boldText = line.replace(/^\*\*(.*)\*\*$/, "$1");
       elements.push(
-        <p key={key++} className="my-2 text-sm font-semibold text-gray-800 dark:text-gray-200">
+        <p
+          key={key++}
+          className="my-2 text-sm font-semibold text-gray-800 dark:text-gray-200"
+        >
           {boldText}
         </p>,
       );
@@ -196,7 +226,10 @@ function renderMemoContent(markdown: string): React.ReactNode {
 
     // Regular paragraph
     elements.push(
-      <p key={key++} className="my-2 text-sm leading-relaxed text-gray-700 dark:text-gray-300">
+      <p
+        key={key++}
+        className="my-2 text-sm leading-relaxed text-gray-700 dark:text-gray-300"
+      >
         {renderInlineMarkdown(line)}
       </p>,
     );
@@ -266,8 +299,11 @@ function renderInlineMarkdown(text: string): React.ReactNode {
 
   // Build interleaved array of text + placeholders
   const result: React.ReactNode[] = [];
-  const segments = remaining.split(/\0[BI]PLACEHOLDER\d+\0|\0CPLACEHOLDER\d+\0/);
-  const placeholders = remaining.match(/\0[BI]PLACEHOLDER\d+\0|\0CPLACEHOLDER\d+\0/g) || [];
+  const segments = remaining.split(
+    /\0[BI]PLACEHOLDER\d+\0|\0CPLACEHOLDER\d+\0/,
+  );
+  const placeholders =
+    remaining.match(/\0[BI]PLACEHOLDER\d+\0|\0CPLACEHOLDER\d+\0/g) || [];
 
   for (let i = 0; i < segments.length; i++) {
     if (segments[i]) result.push(segments[i]);
@@ -282,10 +318,71 @@ function renderInlineMarkdown(text: string): React.ReactNode {
 
 function MemoDetailPage() {
   const { memo } = Route.useLoaderData();
+  const { matchId } = Route.useParams();
   const [outreachGenerating, setOutreachGenerating] = useState(false);
   const [outreachExists, setOutreachExists] = useState(false);
   const [outreachChecked, setOutreachChecked] = useState(false);
   const [outreachError, setOutreachError] = useState<string | null>(null);
+  const [analysis, setAnalysis] = useState<ThesisAnalysis | null>(null);
+  const [analysisLoading, setAnalysisLoading] = useState(false);
+  const [analysisError, setAnalysisError] = useState<string | null>(null);
+  const [strategy, setStrategy] = useState<IntroStrategy | null>(null);
+  const [strategyLoading, setStrategyLoading] = useState(false);
+  const [strategyError, setStrategyError] = useState<string | null>(null);
+  const [strategyOutreachGenerating, setStrategyOutreachGenerating] =
+    useState(false);
+  const [strategyOutreachReady, setStrategyOutreachReady] = useState(false);
+
+  // Load existing analysis + intro strategy for this match on mount
+  useEffect(() => {
+    if (!memo) return;
+    getAnalysis({ data: { matchId } })
+      .then((r) => setAnalysis(r.analysis))
+      .catch(() => setAnalysis(null));
+    getIntroStrategy({ data: { matchId } })
+      .then((r) => setStrategy(r.strategy))
+      .catch(() => setStrategy(null));
+  }, [matchId, memo]);
+
+  const handleGenerateAnalysis = async () => {
+    setAnalysisLoading(true);
+    setAnalysisError(null);
+    try {
+      const result = await generateAnalysis({ data: { matchId } });
+      setAnalysis(result.analysis);
+    } catch (err) {
+      setAnalysisError(err instanceof Error ? err.message : "Unknown error");
+    } finally {
+      setAnalysisLoading(false);
+    }
+  };
+
+  const handleGenerateStrategy = async () => {
+    setStrategyLoading(true);
+    setStrategyError(null);
+    try {
+      const result = await generateIntroStrategyFn({ data: { matchId } });
+      setStrategy(result.strategy);
+    } catch (err) {
+      setStrategyError(err instanceof Error ? err.message : "Unknown error");
+    } finally {
+      setStrategyLoading(false);
+    }
+  };
+
+  const handleGenerateOutreachFromStrategy = async () => {
+    setStrategyOutreachGenerating(true);
+    setStrategyError(null);
+    try {
+      await generateOutreach({ data: { matchId } });
+      setStrategyOutreachReady(true);
+      setOutreachExists(true);
+    } catch (err) {
+      setStrategyError(err instanceof Error ? err.message : "Unknown error");
+    } finally {
+      setStrategyOutreachGenerating(false);
+    }
+  };
 
   const handleGenerateOutreach = async () => {
     if (!memo) return;
@@ -305,10 +402,12 @@ function MemoDetailPage() {
   // Check if outreach exists on mount
   if (!outreachChecked && memo) {
     const matchId = window.location.pathname.split("/").pop() || "";
-    checkMatchHasOutreach({ data: { matchId } }).then((r) => {
-      setOutreachExists(r.hasOutreach);
-      setOutreachChecked(true);
-    }).catch(() => setOutreachChecked(true));
+    checkMatchHasOutreach({ data: { matchId } })
+      .then((r) => {
+        setOutreachExists(r.hasOutreach);
+        setOutreachChecked(true);
+      })
+      .catch(() => setOutreachChecked(true));
   }
 
   if (!memo) {
@@ -327,7 +426,8 @@ function MemoDetailPage() {
             Memo Not Found
           </h2>
           <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
-            This memo may have been deleted or the match doesn't have a memo yet.
+            This memo may have been deleted or the match doesn't have a memo
+            yet.
           </p>
           <Link
             to="/app/matches"
@@ -348,8 +448,18 @@ function MemoDetailPage() {
           to="/app/memos"
           className="inline-flex items-center gap-1 text-sm text-indigo-600 hover:text-indigo-700 dark:text-indigo-400"
         >
-          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+          <svg
+            className="h-4 w-4"
+            fill="none"
+            viewBox="0 0 24 24"
+            strokeWidth={1.5}
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18"
+            />
           </svg>
           Back to Memos
         </Link>
@@ -398,17 +508,24 @@ function MemoDetailPage() {
       {/* SWOT Sections */}
       <div className="mb-8 grid gap-4 sm:grid-cols-2">
         <div className="rounded-xl border border-green-200 bg-green-50 p-4 dark:border-green-800 dark:bg-green-950">
-          <h3 className="text-sm font-semibold text-green-800 dark:text-green-200">Strengths</h3>
+          <h3 className="text-sm font-semibold text-green-800 dark:text-green-200">
+            Strengths
+          </h3>
           <ul className="mt-2 space-y-1">
             {memo.swot.strengths.map((s, i) => (
-              <li key={i} className="text-sm text-green-700 dark:text-green-300">
+              <li
+                key={i}
+                className="text-sm text-green-700 dark:text-green-300"
+              >
                 • {s}
               </li>
             ))}
           </ul>
         </div>
         <div className="rounded-xl border border-red-200 bg-red-50 p-4 dark:border-red-800 dark:bg-red-950">
-          <h3 className="text-sm font-semibold text-red-800 dark:text-red-200">Weaknesses</h3>
+          <h3 className="text-sm font-semibold text-red-800 dark:text-red-200">
+            Weaknesses
+          </h3>
           <ul className="mt-2 space-y-1">
             {memo.swot.weaknesses.map((s, i) => (
               <li key={i} className="text-sm text-red-700 dark:text-red-300">
@@ -418,7 +535,9 @@ function MemoDetailPage() {
           </ul>
         </div>
         <div className="rounded-xl border border-blue-200 bg-blue-50 p-4 dark:border-blue-800 dark:bg-blue-950">
-          <h3 className="text-sm font-semibold text-blue-800 dark:text-blue-200">Opportunities</h3>
+          <h3 className="text-sm font-semibold text-blue-800 dark:text-blue-200">
+            Opportunities
+          </h3>
           <ul className="mt-2 space-y-1">
             {memo.swot.opportunities.map((s, i) => (
               <li key={i} className="text-sm text-blue-700 dark:text-blue-300">
@@ -428,10 +547,15 @@ function MemoDetailPage() {
           </ul>
         </div>
         <div className="rounded-xl border border-yellow-200 bg-yellow-50 p-4 dark:border-yellow-800 dark:bg-yellow-950">
-          <h3 className="text-sm font-semibold text-yellow-800 dark:text-yellow-200">Threats</h3>
+          <h3 className="text-sm font-semibold text-yellow-800 dark:text-yellow-200">
+            Threats
+          </h3>
           <ul className="mt-2 space-y-1">
             {memo.swot.threats.map((s, i) => (
-              <li key={i} className="text-sm text-yellow-700 dark:text-yellow-300">
+              <li
+                key={i}
+                className="text-sm text-yellow-700 dark:text-yellow-300"
+              >
                 • {s}
               </li>
             ))}
@@ -444,6 +568,29 @@ function MemoDetailPage() {
         <div className="prose prose-sm max-w-none dark:prose-invert">
           {renderMemoContent(memo.content)}
         </div>
+      </div>
+
+      {/* Why This Deal — Thesis Fit Analysis */}
+      <div className="mt-8">
+        <AnalysisCard
+          analysis={analysis}
+          loading={analysisLoading}
+          onGenerate={() => void handleGenerateAnalysis()}
+          error={analysisError}
+        />
+      </div>
+
+      {/* Warm Intro Path */}
+      <div className="mt-6">
+        <IntroStrategyCard
+          strategy={strategy}
+          loading={strategyLoading}
+          onGenerate={() => void handleGenerateStrategy()}
+          onGenerateOutreach={() => void handleGenerateOutreachFromStrategy()}
+          outreachGenerating={strategyOutreachGenerating}
+          outreachReady={strategyOutreachReady}
+          error={strategyError}
+        />
       </div>
 
       {/* Footer */}

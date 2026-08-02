@@ -1,8 +1,15 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState } from "react";
-import { getMatches, updateMatchStatus, type MatchEntry } from "./-match-actions";
+import { useEffect, useState } from "react";
+import {
+  getMatches,
+  updateMatchStatus,
+  type MatchEntry,
+} from "./-match-actions";
 import { generateMemo, checkMatchHasMemo } from "./-memo-actions";
 import { generateOutreach, checkMatchHasOutreach } from "./-outreach-actions";
+import { generateAnalysis, getAnalysis } from "./-analysis-actions";
+import { AnalysisCard } from "~/components/AnalysisCard";
+import type { ThesisAnalysis } from "~/lib/analysis";
 
 export const Route = createFileRoute("/app/matches")({
   loader: async () => {
@@ -24,8 +31,10 @@ const STATUS_OPTIONS = [
 ] as const;
 
 function scoreColor(score: number): string {
-  if (score > 0.8) return "text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-950";
-  if (score > 0.6) return "text-yellow-600 dark:text-yellow-400 bg-yellow-50 dark:bg-yellow-950";
+  if (score > 0.8)
+    return "text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-950";
+  if (score > 0.6)
+    return "text-yellow-600 dark:text-yellow-400 bg-yellow-50 dark:bg-yellow-950";
   return "text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950";
 }
 
@@ -49,11 +58,61 @@ function MatchesPage() {
   const [matches, setMatches] = useState<MatchEntry[]>(initialMatches);
   const [selectedMatch, setSelectedMatch] = useState<MatchEntry | null>(null);
   const [generatingMemo, setGeneratingMemo] = useState<string | null>(null);
-  const [memoStates, setMemoStates] = useState<Record<string, "loading" | "exists" | null>>({});
+  const [memoStates, setMemoStates] = useState<
+    Record<string, "loading" | "exists" | null>
+  >({});
   const [memoError, setMemoError] = useState<string | null>(null);
-  const [generatingOutreach, setGeneratingOutreach] = useState<string | null>(null);
-  const [outreachStates, setOutreachStates] = useState<Record<string, "loading" | "exists" | null>>({});
+  const [generatingOutreach, setGeneratingOutreach] = useState<string | null>(
+    null,
+  );
+  const [outreachStates, setOutreachStates] = useState<
+    Record<string, "loading" | "exists" | null>
+  >({});
   const [outreachError, setOutreachError] = useState<string | null>(null);
+  const [selectedAnalysis, setSelectedAnalysis] =
+    useState<ThesisAnalysis | null>(null);
+  const [analysisFetching, setAnalysisFetching] = useState(false);
+  const [analysisGenerating, setAnalysisGenerating] = useState(false);
+  const [analysisError, setAnalysisError] = useState<string | null>(null);
+
+  // Fetch the thesis fit analysis whenever a new match is selected
+  useEffect(() => {
+    let cancelled = false;
+    if (!selectedMatch) {
+      setSelectedAnalysis(null);
+      setAnalysisError(null);
+      return;
+    }
+    setAnalysisFetching(true);
+    setAnalysisError(null);
+    getAnalysis({ data: { matchId: selectedMatch.id } })
+      .then((result) => {
+        if (!cancelled) setSelectedAnalysis(result.analysis);
+      })
+      .catch(() => {
+        if (!cancelled) setSelectedAnalysis(null);
+      })
+      .finally(() => {
+        if (!cancelled) setAnalysisFetching(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [selectedMatch?.id]);
+
+  const handleGenerateAnalysis = async (matchId: string) => {
+    setAnalysisGenerating(true);
+    setAnalysisError(null);
+    try {
+      const result = await generateAnalysis({ data: { matchId } });
+      setSelectedAnalysis(result.analysis);
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "Unknown error";
+      setAnalysisError(msg);
+    } finally {
+      setAnalysisGenerating(false);
+    }
+  };
 
   const handleStatusChange = async (matchId: string, newStatus: string) => {
     try {
@@ -62,7 +121,9 @@ function MatchesPage() {
         prev.map((m) => (m.id === matchId ? { ...m, status: newStatus } : m)),
       );
       if (selectedMatch?.id === matchId) {
-        setSelectedMatch((prev) => (prev ? { ...prev, status: newStatus } : null));
+        setSelectedMatch((prev) =>
+          prev ? { ...prev, status: newStatus } : null,
+        );
       }
     } catch (err) {
       console.error("Failed to update status:", err);
@@ -80,7 +141,9 @@ function MatchesPage() {
         prev.map((m) => (m.id === matchId ? { ...m, status: "reviewing" } : m)),
       );
       if (selectedMatch?.id === matchId) {
-        setSelectedMatch((prev) => (prev ? { ...prev, status: "reviewing" } : null));
+        setSelectedMatch((prev) =>
+          prev ? { ...prev, status: "reviewing" } : null,
+        );
       }
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Unknown error";
@@ -213,7 +276,8 @@ function MatchesPage() {
                         <span
                           className={`inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ${statusBadgeClass(m.status)}`}
                         >
-                          {STATUS_OPTIONS.find((s) => s.value === m.status)?.label ?? m.status}
+                          {STATUS_OPTIONS.find((s) => s.value === m.status)
+                            ?.label ?? m.status}
                         </span>
                       </td>
                     </tr>
@@ -284,7 +348,9 @@ function MatchesPage() {
                     {STATUS_OPTIONS.map((opt) => (
                       <button
                         key={opt.value}
-                        onClick={() => handleStatusChange(selectedMatch.id, opt.value)}
+                        onClick={() =>
+                          handleStatusChange(selectedMatch.id, opt.value)
+                        }
                         className={`inline-flex items-center rounded-lg px-3 py-1.5 text-xs font-medium transition ${
                           selectedMatch.status === opt.value
                             ? "bg-indigo-600 text-white"
@@ -294,6 +360,29 @@ function MatchesPage() {
                         {opt.label}
                       </button>
                     ))}
+                  </div>
+                </div>
+
+                {/* Thesis Fit Analysis */}
+                <div className="mt-6">
+                  <h4 className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                    Why This Deal
+                  </h4>
+                  <div className="mt-2">
+                    {analysisFetching ? (
+                      <p className="text-sm text-gray-400 dark:text-gray-500">
+                        Loading analysis...
+                      </p>
+                    ) : (
+                      <AnalysisCard
+                        analysis={selectedAnalysis}
+                        loading={analysisGenerating}
+                        onGenerate={() =>
+                          void handleGenerateAnalysis(selectedMatch.id)
+                        }
+                        error={analysisError}
+                      />
+                    )}
                   </div>
                 </div>
 
@@ -357,7 +446,9 @@ function MatchesPage() {
                     )}
                   </div>
                   {memoError && (
-                    <p className="mt-2 text-xs text-red-600 dark:text-red-400">{memoError}</p>
+                    <p className="mt-2 text-xs text-red-600 dark:text-red-400">
+                      {memoError}
+                    </p>
                   )}
                 </div>
 
@@ -424,13 +515,16 @@ function MatchesPage() {
                     )}
                   </div>
                   {outreachError && (
-                    <p className="mt-2 text-xs text-red-600 dark:text-red-400">{outreachError}</p>
+                    <p className="mt-2 text-xs text-red-600 dark:text-red-400">
+                      {outreachError}
+                    </p>
                   )}
                 </div>
 
                 {/* Timestamps */}
                 <div className="mt-4 text-xs text-gray-400 dark:text-gray-500">
-                  Matched {new Date(selectedMatch.created_at).toLocaleDateString()}
+                  Matched{" "}
+                  {new Date(selectedMatch.created_at).toLocaleDateString()}
                   {selectedMatch.reviewed_at &&
                     ` · Reviewed ${new Date(selectedMatch.reviewed_at).toLocaleDateString()}`}
                 </div>
