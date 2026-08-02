@@ -1,8 +1,15 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
 import { Outlet, Link } from "@tanstack/react-router";
 import { UserButton, useAuth } from "@clerk/tanstack-start";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { ToastProvider } from "~/components/Toast";
+import { getCurrentUser, type Tier } from "./-onboarding-actions";
+
+const TIER_LABELS: Record<Tier, string> = {
+  solo: "Solo",
+  studio: "Studio",
+  firm: "Firm",
+};
 
 export const Route = createFileRoute("/app/__root")({
   beforeLoad: async () => {
@@ -25,6 +32,15 @@ export const Route = createFileRoute("/app/__root")({
 
 function AppLayout() {
   const { isLoaded, isSignedIn } = useAuth();
+  const [tier, setTier] = useState<Tier | null>(null);
+
+  // Load the user's plan tier to show in the sidebar
+  useEffect(() => {
+    if (!isSignedIn) return;
+    getCurrentUser()
+      .then((u) => setTier(u.tier))
+      .catch(() => {});
+  }, [isSignedIn]);
 
   // Check onboarding status on client-side (redirect to onboarding if needed)
   useEffect(() => {
@@ -109,6 +125,16 @@ function AppLayout() {
 
           {/* User Section */}
           <div className="border-t border-indigo-100/70 p-4 dark:border-indigo-950">
+            {tier && (
+              <div className="mb-3 flex items-center gap-2 rounded-lg bg-gradient-to-r from-indigo-50 to-violet-50 px-3 py-2 dark:from-indigo-950/60 dark:to-violet-950/60">
+                <span className="flex h-5 w-5 items-center justify-center rounded-md bg-gradient-to-br from-indigo-600 via-violet-600 to-fuchsia-500 text-[10px] font-bold text-white">
+                  {TIER_LABELS[tier][0]}
+                </span>
+                <span className="text-xs font-semibold text-indigo-700 dark:text-indigo-300">
+                  {TIER_LABELS[tier]} Plan
+                </span>
+              </div>
+            )}
             <div className="flex items-center gap-3">
               <UserButton
                 afterSignOutUrl="/"

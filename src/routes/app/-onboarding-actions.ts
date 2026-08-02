@@ -51,6 +51,56 @@ export const completeOnboarding = createServerFn({ method: "POST" }).handler(asy
   return { success: true };
 });
 
+// ── Tier (plan) ──────────────────────────────────────────────────────────
+
+export type Tier = "solo" | "studio" | "firm";
+
+const VALID_TIERS: Tier[] = ["solo", "studio", "firm"];
+
+/** Ensure the users.tier column exists (idempotent). */
+async function ensureTierColumn() {
+  await sql()`ALTER TABLE users ADD COLUMN IF NOT EXISTS tier VARCHAR(20) NOT NULL DEFAULT 'solo'`;
+}
+
+/**
+ * Save the plan tier picked on the /welcome page (localStorage "scout_tier")
+ * to the authenticated user's record. Call from the onboarding completion flow.
+ */
+export const saveTier = createServerFn({ method: "POST" })
+  .handler(async ({ data }: { data: { tier: string } }) => {
+    const userId = await getCurrentUserId();
+
+    const tier = data.tier as Tier;
+    if (!VALID_TIERS.includes(tier)) {
+      throw new Error("Invalid tier");
+    }
+
+    await ensureTierColumn();
+
+    await sql()`
+      UPDATE users SET tier = ${tier}, updated_at = now()
+      WHERE id = ${userId}::uuid
+    `;
+    return { success: true, tier };
+  });
+
+/** Fetch the current user's tier (used to display the plan in the app shell). */
+export const getCurrentUser = createServerFn({ method: "GET" }).handler(async () => {
+  const userId = await getCurrentUserId();
+
+  await ensureTierColumn();
+
+  const rows = await sql()`
+    SELECT tier, email, fund_name FROM users WHERE id = ${userId}::uuid LIMIT 1
+  `;
+  const row = rows[0] as { tier?: string; email?: string; fund_name?: string | null } | undefined;
+  return {
+    tier: (row?.tier as Tier) ?? "solo",
+    email: row?.email ?? "",
+    fundName: row?.fund_name ?? null,
+  };
+});
+
 // ── Create thesis from free text via GPT-4o ─────────────────────────────
 
 export const createThesisFromText = createServerFn({ method: "POST" })

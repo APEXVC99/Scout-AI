@@ -4,6 +4,7 @@ import {
   checkOnboarding,
   completeOnboarding,
   createThesisFromText,
+  saveTier,
 } from "./-onboarding-actions";
 import { scanSources, getRecentCompanies } from "./-pipeline-actions";
 import { getMatches, matchCompanyToTheses } from "./-match-actions";
@@ -127,6 +128,21 @@ function OnboardingPage() {
   };
 
   const handleFinish = async () => {
+    // Persist the plan tier picked on the /welcome page. It is stored in
+    // localStorage BEFORE sign-up (same origin, so it survives the Clerk
+    // redirect) and is saved here when onboarding completes.
+    try {
+      const tier = localStorage.getItem("scout_tier");
+      if (tier) {
+        try {
+          await saveTier({ data: { tier } });
+          localStorage.removeItem("scout_tier");
+        } catch {
+          // Non-blocking: onboarding still completes; tier stays in
+          // localStorage so it can be retried on a later visit.
+        }
+      }
+    } catch {}
     try {
       await completeOnboarding();
     } catch {}
