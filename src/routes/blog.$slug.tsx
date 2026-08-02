@@ -23,7 +23,7 @@ export const Route = createFileRoute("/blog/$slug")({
     const title = post ? `${post.title} — Scout AI Blog` : "Post not found — Scout AI";
     const description =
       post?.description || post?.excerpt || "Scout AI blog post.";
-    const url = post ? `https://getscoutai.app/blog/${post.slug}` : "https://getscoutai.app/blog";
+    const url = post ? `https://www.getscoutai.app/blog/${post.slug}` : "https://www.getscoutai.app/blog";
     return {
       meta: [
         { title },
@@ -32,9 +32,14 @@ export const Route = createFileRoute("/blog/$slug")({
         { property: "og:description", content: description },
         { property: "og:type", content: "article" },
         { property: "og:url", content: url },
+        { property: "og:image", content: "https://www.getscoutai.app/og-image.png" },
+        { property: "og:image:width", content: "1200" },
+        { property: "og:image:height", content: "630" },
+        { property: "og:image:alt", content: "Scout AI — Autonomous deal sourcing, 24/7" },
         { name: "twitter:card", content: "summary_large_image" },
         { name: "twitter:title", content: title },
         { name: "twitter:description", content: description },
+        { name: "twitter:image", content: "https://www.getscoutai.app/og-image.png" },
       ],
     };
   },
