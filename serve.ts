@@ -9,6 +9,7 @@
 // with an already-running server. Every sandbox user has passwordless sudo, so
 // the takeover works across user boundaries.
 import handler from "./dist/server/server.js";
+import { neon } from "@neondatabase/serverless";
 
 // Pinned, NOT read from the environment. The published preview URL
 // (<label>.<PUBLIC_SITE_DOMAIN>) is reverse-proxied to 0.0.0.0:3000 inside the
@@ -41,6 +42,36 @@ for (let attempt = 1; ; attempt++) {
       hostname: HOST,
       async fetch(req) {
         const { pathname } = new URL(req.url);
+
+        // Waitlist API — direct handler so the static landing page works
+        if (req.method === "POST" && pathname === "/api/waitlist") {
+          try {
+            const body = await req.json() as { email?: string };
+            const email = body.email?.trim().toLowerCase();
+            if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+              return Response.json({ error: "Please enter a valid email address." }, { status: 400 });
+            }
+            const dbUrl = process.env.DATABASE_URL;
+            if (!dbUrl) {
+              return Response.json({ error: "Service unavailable — database not connected." }, { status: 503 });
+            }
+            const sql = neon(dbUrl);
+            await sql`CREATE TABLE IF NOT EXISTS waitlist_subscribers (
+              id SERIAL PRIMARY KEY,
+              email VARCHAR(255) NOT NULL UNIQUE,
+              created_at TIMESTAMP DEFAULT NOW()
+            )`;
+            await sql`INSERT INTO waitlist_subscribers (email) VALUES (${email})`;
+            return Response.json({ success: true });
+          } catch (err: unknown) {
+            const code = (err as { code?: string })?.code;
+            if (code === "23505") {
+              return Response.json({ error: "You're already on the list!" });
+            }
+            return Response.json({ error: "Something went wrong. Please try again." }, { status: 500 });
+          }
+        }
+
         // Serve the static landing page for / (bypasses Clerk SSR)
         if (pathname === "/") {
           const landing = Bun.file(CLIENT_DIR + "/landing.html");
