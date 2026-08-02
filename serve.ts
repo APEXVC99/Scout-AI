@@ -41,6 +41,15 @@ for (let attempt = 1; ; attempt++) {
       hostname: HOST,
       async fetch(req) {
         const { pathname } = new URL(req.url);
+        // Serve the static landing page for / (bypasses Clerk SSR)
+        if (pathname === "/") {
+          const landing = Bun.file(CLIENT_DIR + "/landing.html");
+          if (await landing.exists()) {
+            return new Response(landing, {
+              headers: { "Content-Type": "text/html; charset=utf-8" },
+            });
+          }
+        }
         if (pathname !== "/") {
           const file = Bun.file(CLIENT_DIR + pathname);
           if (await file.exists()) return new Response(file);

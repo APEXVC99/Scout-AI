@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Scout AI — Autonomous AI Deal Sourcing for VCs</title>
+<meta name="description" content="Scout AI deploys autonomous AI agents that work around the clock to source investment deals — scraping startup databases, tracking founder movements, building investment theses and deal memos, and sending personalized outreach.">
+<meta property="og:title" content="Scout AI — Autonomous AI Deal Sourcing for VCs">
+<meta property="og:description" content="Scout AI deploys autonomous AI agents that work around the clock to source investment deals.">
+<meta property="og:image" content="/og-image.png">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="icon" type="image/x-icon" href="/favicon.ico">
+<script src="https://cdn.tailwindcss.com"></script>
+<script>tailwind.config={darkMode:'class',theme:{extend:{animation:{blob:'blob 16s ease-in-out infinite','blob-delayed':'blob 20s ease-in-out 4s infinite',float:'float 7s ease-in-out infinite',shimmer:'shimmer 6s linear infinite'},keyframes:{blob:{'0%,100%':{transform:'translate(0,0) scale(1)'},'25%':{transform:'translate(24px,-32px) scale(1.08)'},'50%':{transform:'translate(-16px,20px) scale(0.94)'},'75%':{transform:'translate(12px,28px) scale(1.05)'}},float:{'0%,100%':{transform:'translateY(0)'},'50%':{transform:'translateY(-10px)'}},shimmer:{'0%':{backgroundPosition:'-200% center'},'100%':{backgroundPosition:'200% center'}}}}}}</script>
+<style>
+.bg-page{background:radial-gradient(1100px 520px at 85% -10%,rgba(168,85,247,0.16),transparent 60%),radial-gradient(900px 480px at 0% 0%,rgba(79,70,229,0.2),transparent 55%),radial-gradient(800px 600px at 50% 110%,rgba(6,182,212,0.1),transparent 60%),linear-gradient(180deg,#eef2ff 0%,#f5f3ff 32%,#ffffff 55%,#ecfeff 100%)}
+.dark .bg-page{background:radial-gradient(1100px 520px at 85% -10%,rgba(168,85,247,0.22),transparent 60%),radial-gradient(900px 480px at 0% 0%,rgba(79,70,229,0.28),transparent 55%),radial-gradient(800px 600px at 50% 110%,rgba(6,182,212,0.12),transparent 60%),linear-gradient(180deg,#171431 0%,#0f0a2e 32%,#020617 60%,#04101f 100%)}
+.text-gradient{background-image:linear-gradient(100deg,#4f46e5 0%,#7c3aed 45%,#0891b2 100%);-webkit-background-clip:text;background-clip:text;color:transparent}
+.text-gradient-shimmer{background-image:linear-gradient(100deg,#4f46e5 0%,#7c3aed 30%,#d946ef 50%,#06b6d4 70%,#4f46e5 100%);background-size:200% auto;-webkit-background-clip:text;background-clip:text;color:transparent;animation:shimmer 6s linear infinite}
+.btn-gradient{background-image:linear-gradient(100deg,#4f46e5 0%,#7c3aed 55%,#a855f7 100%);color:#fff;box-shadow:0 8px 24px -8px rgba(124,58,237,0.55);transition:transform 150ms ease,box-shadow 150ms ease,filter 150ms ease}
+.btn-gradient:hover{transform:translateY(-1px);box-shadow:0 12px 32px -8px rgba(124,58,237,0.65);filter:brightness(1.08)}
+.card-gradient-border{position:relative}
+.card-gradient-border::before{content:'';position:absolute;inset:0;border-radius:1rem;padding:1px;background:linear-gradient(135deg,rgba(139,92,246,0.5),rgba(6,182,212,0.35),rgba(168,85,247,0.45));-webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);-webkit-mask-composite:xor;mask-composite:exclude;pointer-events:none}
+.card-lift{transition:transform 200ms ease,box-shadow 200ms ease}
+.card-lift:hover{transform:translateY(-2px);box-shadow:0 12px 28px -10px rgba(99,102,241,0.12)}
+.section-divider{height:1px;background:linear-gradient(90deg,transparent,rgba(139,92,246,0.25) 40%,rgba(6,182,212,0.25) 60%,transparent)}
+</style>
+<script>
+if(window.matchMedia('(prefers-color-scheme:dark)').matches)document.documentElement.classList.add('dark');
+</script>
+</head>
+<body class="bg-page min-h-dvh text-gray-900 antialiased">
+
+<!-- Header -->
+<header class="sticky top-0 z-50 border-b border-indigo-100/70 bg-white/80 backdrop-blur-md">
+<div class="mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
+<a href="#" class="flex items-center gap-2 text-lg font-bold tracking-tight">
+<img src="/logo.svg" alt="Scout AI" class="h-8 w-8">
+<span class="text-gradient">Scout AI</span>
+</a>
+<nav class="flex items-center gap-4">
+<a href="#how-it-works" class="text-sm font-medium text-gray-600 transition hover:text-gray-900">How it works</a>
+<a href="#pricing" class="text-sm font-medium text-gray-600 transition hover:text-gray-900">Pricing</a>
+<a href="/blog" class="text-sm font-medium text-gray-600 transition hover:text-gray-900">Blog</a>
+<a href="/sign-in" class="text-sm font-medium text-gray-600 transition hover:text-gray-900">Sign In</a>
+<a href="/sign-up" class="btn-gradient rounded-full px-5 py-2 text-sm font-semibold">Get Started Free</a>
+</nav>
+</div>
+</header>
+
+<!-- Hero -->
+<section class="relative overflow-hidden px-6 pt-20 pb-24 sm:pt-28 sm:pb-32">
+<div class="pointer-events-none absolute inset-0">
+<div class="animate-blob absolute -top-32 left-1/2 h-[420px] w-[640px] -translate-x-1/2 rounded-full bg-gradient-to-r from-indigo-400/30 via-violet-400/25 to-purple-400/30 blur-3xl"></div>
+<div class="animate-blob-delayed absolute top-24 -left-24 h-[320px] w-[320px] rounded-full bg-gradient-to-br from-cyan-300/25 to-sky-400/20 blur-3xl"></div>
+<div class="animate-float absolute -right-20 top-40 h-[300px] w-[300px] rounded-full bg-gradient-to-bl from-fuchsia-300/25 to-violet-400/20 blur-3xl"></div>
+</div>
+<div class="pointer-events-none absolute inset-0 opacity-[0.04]" style="background-image:radial-gradient(circle,#4f46e5 1px,transparent 1px);background-size:28px 28px;mask-image:radial-gradient(ellipse 80% 60% at 50% 0%,black,transparent);-webkit-mask-image:radial-gradient(ellipse 80% 60% at 50% 0%,black,transparent)"></div>
+<div class="relative mx-auto max-w-4xl text-center">
+<img src="/logo.svg" alt="Scout AI" class="mx-auto mb-8 h-20 w-20">
+<span class="mb-6 inline-flex items-center gap-2 rounded-full border border-indigo-200/80 bg-gradient-to-r from-indigo-50 via-violet-50 to-purple-50 px-4 py-1.5 text-sm font-medium text-indigo-700 shadow-sm">
+<span class="relative flex h-2 w-2">
+<span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-gradient-to-r from-indigo-400 to-fuchsia-400 opacity-75"></span>
+<span class="relative inline-flex h-2 w-2 rounded-full bg-gradient-to-r from-indigo-500 to-violet-500"></span>
+</span>
+Autonomous deal sourcing, 24/7
+</span>
+<h1 class="text-4xl font-bold tracking-tight sm:text-5xl lg:text-6xl">
+Your tireless <span class="text-gradient-shimmer">AI research team</span><br>
+that never sleeps
+</h1>
+<p class="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-gray-600 sm:text-xl">
+Scout AI deploys autonomous AI agents that source investment deals around the clock — scraping databases, tracking founder movements, building investment theses and deal memos, and sending personalized outreach. Top-tier deal flow, without the top-tier headcount.
+</p>
+<div class="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
+<a href="/sign-up" class="btn-gradient inline-flex items-center gap-2 rounded-xl px-6 py-3 text-base font-semibold">
+Get Started Free
+<svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14m0 0l-6-6m6 6l-6 6"/></svg>
+</a>
+<a href="#how-it-works" class="inline-flex items-center gap-2 rounded-xl border border-indigo-200/70 bg-white/60 px-6 py-3 text-base font-medium text-indigo-700 backdrop-blur transition hover:border-indigo-300 hover:bg-white">
+See how it works <span class="text-lg">→</span>
+</a>
+</div>
+</div>
+</section>
+
+<!-- Divider -->
+<div class="section-divider mx-auto max-w-4xl"></div>
+
+<!-- How It Works -->
+<section id="how-it-works" class="px-6 py-24 sm:py-32">
+<div class="mx-auto max-w-6xl">
+<div class="mx-auto max-w-2xl text-center">
+<span class="mb-3 inline-block rounded-full border border-violet-200 bg-violet-50 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-violet-700">How it works</span>
+<h2 class="text-3xl font-bold tracking-tight sm:text-4xl">Your deal pipeline, <span class="text-gradient">on autopilot</span></h2>
+<p class="mt-4 text-lg text-gray-600">Four steps from signal to inbox. The agent loop runs continuously — you wake up to a curated pipeline every morning.</p>
+</div>
+<div class="mt-16 grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
+<!-- Step 1 -->
+<div class="card-lift group relative rounded-2xl border border-gray-100 bg-white/80 p-6 backdrop-blur-sm">
+<div class="pointer-events-none absolute inset-x-6 top-0 h-px bg-gradient-to-r from-transparent via-indigo-400/50 to-transparent opacity-0 transition group-hover:opacity-100"></div>
+<div class="mb-4 flex h-11 w-11 items-center justify-center rounded-xl text-white shadow-lg bg-gradient-to-br from-indigo-500 to-violet-600">
+<svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/><circle cx="12" cy="12" r="2"/></svg>
+</div>
+<span class="text-sm font-bold tracking-widest text-indigo-600">01</span>
+<h3 class="mt-2 text-lg font-semibold">Scan the entire ecosystem</h3>
+<p class="mt-2 text-sm leading-relaxed text-gray-600">Agents continuously scrape startup databases, news outlets, job boards, and social platforms — tracking thousands of signals across the tech landscape so you never miss a beat.</p>
+</div>
+<!-- Step 2 -->
+<div class="card-lift group relative rounded-2xl border border-gray-100 bg-white/80 p-6 backdrop-blur-sm">
+<div class="pointer-events-none absolute inset-x-6 top-0 h-px bg-gradient-to-r from-transparent via-indigo-400/50 to-transparent opacity-0 transition group-hover:opacity-100"></div>
+<div class="mb-4 flex h-11 w-11 items-center justify-center rounded-xl text-white shadow-lg bg-gradient-to-br from-violet-500 to-purple-600">
+<svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/><circle cx="12" cy="12" r="0.5" fill="currentColor"/></svg>
+</div>
+<span class="text-sm font-bold tracking-widest text-violet-600">02</span>
+<h3 class="mt-2 text-lg font-semibold">Track founders and momentum</h3>
+<p class="mt-2 text-sm leading-relaxed text-gray-600">Agents monitor founder movements, company milestones, hiring surges, product launches, and funding signals — surfacing the startups that match your thesis before they hit a data room.</p>
+</div>
+<!-- Step 3 -->
+<div class="card-lift group relative rounded-2xl border border-gray-100 bg-white/80 p-6 backdrop-blur-sm">
+<div class="pointer-events-none absolute inset-x-6 top-0 h-px bg-gradient-to-r from-transparent via-indigo-400/50 to-transparent opacity-0 transition group-hover:opacity-100"></div>
+<div class="mb-4 flex h-11 w-11 items-center justify-center rounded-xl text-white shadow-lg bg-gradient-to-br from-purple-500 to-fuchsia-600">
+<svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6z"/><path d="M14 2v6h6M10 14h4M10 17h2"/></svg>
+</div>
+<span class="text-sm font-bold tracking-widest text-purple-600">03</span>
+<h3 class="mt-2 text-lg font-semibold">Build theses and memos automatically</h3>
+<p class="mt-2 text-sm leading-relaxed text-gray-600">AI synthesizes research into structured investment theses, deal memos, and SWOT analyses — so you walk into every meeting with institutional-grade preparation.</p>
+</div>
+<!-- Step 4 -->
+<div class="card-lift group relative rounded-2xl border border-gray-100 bg-white/80 p-6 backdrop-blur-sm">
+<div class="pointer-events-none absolute inset-x-6 top-0 h-px bg-gradient-to-r from-transparent via-indigo-400/50 to-transparent opacity-0 transition group-hover:opacity-100"></div>
+<div class="mb-4 flex h-11 w-11 items-center justify-center rounded-xl text-white shadow-lg bg-gradient-to-br from-cyan-500 to-sky-600">
+<svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path d="M3 10l18-7-7 18-1.5-6.5L3 10z"/></svg>
+</div>
+<span class="text-sm font-bold tracking-widest text-cyan-600">04</span>
+<h3 class="mt-2 text-lg font-semibold">Outreach that feels personal</h3>
+<p class="mt-2 text-sm leading-relaxed text-gray-600">Personalized emails land in the right founders' inboxes, written in your voice and aligned to your investment criteria. Your pipeline fills while you sleep.</p>
+</div>
+</div>
+</div>
+</section>
+
+<!-- Who It's For -->
+<section class="relative overflow-hidden border-y border-indigo-100/60 bg-white/50 px-6 py-24 backdrop-blur-sm sm:py-32">
+<div class="pointer-events-none absolute -top-32 right-0 h-64 w-96 rounded-full bg-gradient-to-bl from-violet-300/20 to-transparent blur-3xl"></div>
+<div class="relative mx-auto max-w-6xl">
+<div class="mx-auto max-w-2xl text-center">
+<span class="mb-3 inline-block rounded-full border border-cyan-200 bg-cyan-50 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-cyan-700">Who it's for</span>
+<h2 class="text-3xl font-bold tracking-tight sm:text-4xl">Built for investors who <span class="text-gradient">can't afford to miss</span></h2>
+<p class="mt-4 text-lg text-gray-600">Top-tier funds staff entire research teams. Scout AI levels the playing field.</p>
+</div>
+<div class="mt-16 grid gap-8 sm:grid-cols-3">
+<div class="card-lift group relative overflow-hidden rounded-2xl border border-gray-100 bg-white p-8 shadow-sm">
+<div class="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-indigo-500 to-violet-500"></div>
+<div class="mb-4 h-10 w-10 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-500 opacity-90 shadow-md"></div>
+<h3 class="text-xl font-semibold">Solo GPs</h3>
+<p class="mt-3 leading-relaxed text-gray-600">You're running the fund, sourcing deals, and managing portfolio support — all by yourself. Scout AI gives you an institutional-grade research function without hiring a single analyst.</p>
+</div>
+<div class="card-lift group relative overflow-hidden rounded-2xl border border-gray-100 bg-white p-8 shadow-sm">
+<div class="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-violet-500 to-purple-500"></div>
+<div class="mb-4 h-10 w-10 rounded-xl bg-gradient-to-br from-violet-500 to-purple-500 opacity-90 shadow-md"></div>
+<h3 class="text-xl font-semibold">Emerging fund managers</h3>
+<p class="mt-3 leading-relaxed text-gray-600">Fund I or Fund II? You need to punch above your weight class. Scout AI helps you build a proprietary pipeline that competes with multi-billion-dollar firms.</p>
+</div>
+<div class="card-lift group relative overflow-hidden rounded-2xl border border-gray-100 bg-white p-8 shadow-sm">
+<div class="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-purple-500 to-fuchsia-500"></div>
+<div class="mb-4 h-10 w-10 rounded-xl bg-gradient-to-br from-purple-500 to-fuchsia-500 opacity-90 shadow-md"></div>
+<h3 class="text-xl font-semibold">Small VC firms</h3>
+<p class="mt-3 leading-relaxed text-gray-600">You have a lean team and high ambitions. Scout AI amplifies your existing analysts — letting them focus on relationship-building while agents handle the grind of sourcing.</p>
+</div>
+</div>
+<div class="mt-16 text-center">
+<p class="text-sm font-medium uppercase tracking-wider text-gray-400">Designed for the future of venture</p>
+<div class="mt-6 flex flex-wrap items-center justify-center gap-8 text-gray-300">
+<span class="text-2xl font-bold">Seed</span>
+<span class="text-2xl font-bold">Series A</span>
+<span class="text-2xl font-bold">Pre-seed</span>
+</div>
+</div>
+</div>
+</section>
+
+<!-- Divider -->
+<div class="section-divider mx-auto max-w-4xl"></div>
+
+<!-- Pricing -->
+<section id="pricing" class="px-6 py-24 sm:py-32">
+<div class="mx-auto max-w-6xl">
+<div class="mx-auto max-w-2xl text-center">
+<span class="mb-3 inline-block rounded-full border border-fuchsia-200 bg-fuchsia-50 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-fuchsia-700">Pricing</span>
+<h2 class="text-3xl font-bold tracking-tight sm:text-4xl">Simple, transparent pricing</h2>
+<p class="mt-4 text-lg text-gray-600">Less than a junior analyst's monthly stipend — for 24/7 autonomous coverage. No hidden fees, cancel anytime.</p>
+</div>
+<div class="mt-16 grid gap-8 lg:grid-cols-3">
+<!-- Solo -->
+<div class="relative flex flex-col overflow-hidden rounded-2xl border border-cyan-200 bg-white shadow-sm">
+<div class="h-1.5 w-full bg-gradient-to-r from-cyan-500 to-sky-600"></div>
+<div class="flex flex-1 flex-col p-8">
+<h3 class="text-xl font-semibold">Solo</h3>
+<div class="mt-4 flex items-baseline gap-1"><span class="text-4xl font-bold tracking-tight">$499</span><span class="text-lg text-gray-500">/mo</span></div>
+<ul class="mt-8 flex-1 space-y-3">
+<li class="flex items-start gap-3 text-sm text-gray-600"><svg class="mt-0.5 h-4 w-4 flex-shrink-0 text-cyan-500" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>3 active theses</li>
+<li class="flex items-start gap-3 text-sm text-gray-600"><svg class="mt-0.5 h-4 w-4 flex-shrink-0 text-cyan-500" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>1 agent</li>
+<li class="flex items-start gap-3 text-sm text-gray-600"><svg class="mt-0.5 h-4 w-4 flex-shrink-0 text-cyan-500" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>Up to 50 tracked companies</li>
+<li class="flex items-start gap-3 text-sm text-gray-600"><svg class="mt-0.5 h-4 w-4 flex-shrink-0 text-cyan-500" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>Full autonomous loop</li>
+</ul>
+<a href="https://buy.stripe.com/aFa9AScMse5sgYR8iz6Na03" class="mt-8 inline-flex items-center justify-center rounded-xl border border-cyan-200 bg-white px-6 py-3 text-sm font-semibold text-cyan-700 transition hover:bg-cyan-50">Subscribe</a>
+</div>
+</div>
+<!-- Studio (highlighted) -->
+<div class="card-gradient-border relative flex flex-col overflow-hidden rounded-2xl bg-white shadow-xl shadow-violet-500/15 lg:-translate-y-2">
+<div class="h-1.5 w-full bg-gradient-to-r from-indigo-600 via-violet-600 to-fuchsia-500"></div>
+<div class="absolute right-4 top-4 z-10"><span class="btn-gradient inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-bold uppercase tracking-wide shadow-md"><svg class="h-3 w-3" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.958a1 1 0 00.95.69h4.162c.969 0 1.371 1.24.588 1.81l-3.368 2.446a1 1 0 00-.363 1.118l1.287 3.957c.3.922-.755 1.688-1.539 1.118l-3.367-2.446a1 1 0 00-1.176 0l-3.367 2.446c-.784.57-1.838-.196-1.539-1.118l1.286-3.957a1 1 0 00-.363-1.118L2.53 9.385c-.783-.57-.38-1.81.588-1.81h4.162a1 1 0 00.95-.69l1.287-3.958z"/></svg>Most Popular</span></div>
+<div class="flex flex-1 flex-col p-8">
+<h3 class="text-xl font-semibold">Studio</h3>
+<div class="mt-4 flex items-baseline gap-1"><span class="text-4xl font-bold tracking-tight">$1,499</span><span class="text-lg text-gray-500">/mo</span></div>
+<ul class="mt-8 flex-1 space-y-3">
+<li class="flex items-start gap-3 text-sm text-gray-600"><svg class="mt-0.5 h-4 w-4 flex-shrink-0 text-violet-500" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>10 active theses</li>
+<li class="flex items-start gap-3 text-sm text-gray-600"><svg class="mt-0.5 h-4 w-4 flex-shrink-0 text-violet-500" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>5 agents</li>
+<li class="flex items-start gap-3 text-sm text-gray-600"><svg class="mt-0.5 h-4 w-4 flex-shrink-0 text-violet-500" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>Up to 300 tracked companies</li>
+<li class="flex items-start gap-3 text-sm text-gray-600"><svg class="mt-0.5 h-4 w-4 flex-shrink-0 text-violet-500" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>Custom outreach templates</li>
+</ul>
+<a href="https://buy.stripe.com/9B67sKfYEe5s8sleGX6Na04" class="btn-gradient mt-8 inline-flex items-center justify-center rounded-xl px-6 py-3 text-sm font-semibold">Subscribe</a>
+</div>
+</div>
+<!-- Firm -->
+<div class="relative flex flex-col overflow-hidden rounded-2xl border border-purple-200 bg-white shadow-sm">
+<div class="h-1.5 w-full bg-gradient-to-r from-purple-500 to-fuchsia-600"></div>
+<div class="flex flex-1 flex-col p-8">
+<h3 class="text-xl font-semibold">Firm</h3>
+<div class="mt-4 flex items-baseline gap-1"><span class="text-4xl font-bold tracking-tight">$3,999</span><span class="text-lg text-gray-500">/mo</span></div>
+<ul class="mt-8 flex-1 space-y-3">
+<li class="flex items-start gap-3 text-sm text-gray-600"><svg class="mt-0.5 h-4 w-4 flex-shrink-0 text-purple-500" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>Unlimited theses</li>
+<li class="flex items-start gap-3 text-sm text-gray-600"><svg class="mt-0.5 h-4 w-4 flex-shrink-0 text-purple-500" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>20+ agents</li>
+<li class="flex items-start gap-3 text-sm text-gray-600"><svg class="mt-0.5 h-4 w-4 flex-shrink-0 text-purple-500" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>Custom data sources</li>
+<li class="flex items-start gap-3 text-sm text-gray-600"><svg class="mt-0.5 h-4 w-4 flex-shrink-0 text-purple-500" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>White-label memos</li>
+<li class="flex items-start gap-3 text-sm text-gray-600"><svg class="mt-0.5 h-4 w-4 flex-shrink-0 text-purple-500" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>Priority support</li>
+</ul>
+<a href="https://buy.stripe.com/14A7sK5k05yW23X7ev6Na05" class="mt-8 inline-flex items-center justify-center rounded-xl border border-purple-200 bg-white px-6 py-3 text-sm font-semibold text-purple-700 transition hover:bg-purple-50">Subscribe</a>
+</div>
+</div>
+</div>
+</div>
+</section>
+
+<!-- Waitlist -->
+<section id="waitlist" class="px-6 py-24 sm:py-32">
+<div class="mx-auto max-w-2xl text-center">
+<h2 class="text-3xl font-bold tracking-tight sm:text-4xl">Get early access to <span class="text-gradient-shimmer">Scout AI</span></h2>
+<p class="mt-4 text-lg text-gray-600">We're onboarding a small cohort of investors. Join the waitlist and we'll reach out as we roll out access.</p>
+<form class="mt-10" action="/api/waitlist" method="POST">
+<div class="mx-auto flex max-w-md flex-col gap-3 sm:flex-row">
+<div class="flex-1">
+<label for="email" class="sr-only">Email address</label>
+<input id="email" name="email" type="email" required placeholder="you@yourfund.com" class="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-base shadow-sm placeholder:text-gray-400 focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500/20">
+</div>
+<button type="submit" class="btn-gradient inline-flex items-center justify-center rounded-xl px-6 py-3 text-base font-semibold">Join waitlist</button>
+</div>
+<p class="mt-4 text-xs text-gray-400">No spam, ever. We'll only email you about Scout AI early access.</p>
+</form>
+</div>
+</section>
+
+<!-- Footer -->
+<footer class="border-t border-indigo-100/60 bg-white/40 px-6 py-8">
+<div class="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 text-sm text-gray-400 sm:flex-row">
+<p>&copy; 2026 Scout AI. All rights reserved.</p>
+<nav class="flex gap-6">
+<a href="/blog" class="hover:text-gray-600">Blog</a>
+<a href="/terms" class="hover:text-gray-600">Terms of Service</a>
+<a href="/privacy" class="hover:text-gray-600">Privacy Policy</a>
+</nav>
+</div>
+</footer>
+
+</body>
+</html>
