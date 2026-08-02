@@ -1,4 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
+import { sendOutreachEmail } from "~/lib/email";
 import {
   generateOutreachEmail,
   getOutreachForMatch,
