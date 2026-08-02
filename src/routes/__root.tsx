@@ -24,17 +24,23 @@ export const Route = createRootRoute({
       {
         property: "og:description",
         content:
-          "Scout AI deploys autonomous AI agents that source investment deals 24/7 — scraping databases, tracking founders, building memos, and sending outreach. Built for emerging VC funds and solo GPs.",
+          "AI agents that find, research, and reach out to startups 24/7. Give your fund top-tier deal flow without the headcount.",
       },
       { property: "og:type", content: "website" },
-      { property: "og:url", content: "https://getscoutai.app" },
+      { property: "og:url", content: "https://www.getscoutai.app" },
+      { property: "og:site_name", content: "Scout AI" },
+      { property: "og:image", content: "https://www.getscoutai.app/og-image.png" },
+      { property: "og:image:width", content: "1200" },
+      { property: "og:image:height", content: "630" },
+      { property: "og:image:alt", content: "Scout AI — Autonomous deal sourcing, 24/7" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:title", content: "Scout AI — Autonomous Deal Flow for VCs" },
       {
         name: "twitter:description",
         content:
-          "Scout AI deploys autonomous AI agents that source investment deals 24/7 — scraping databases, tracking founders, building memos, and sending outreach. Built for emerging VC funds and solo GPs.",
+          "AI agents that find, research, and reach out to startups 24/7. Give your fund top-tier deal flow without the headcount.",
       },
+      { name: "twitter:image", content: "https://www.getscoutai.app/og-image.png" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
