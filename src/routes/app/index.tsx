@@ -159,6 +159,12 @@ function DashboardHome() {
                 >
                   Create a Thesis
                 </Link>
+                <a
+                  href="https://www.getscoutai.app/#pricing"
+                  className="inline-flex items-center rounded-lg border border-indigo-200 bg-indigo-50 px-4 py-2 text-sm font-medium text-indigo-700 transition hover:border-indigo-300 hover:bg-indigo-100 dark:border-indigo-800 dark:bg-indigo-950 dark:text-indigo-300 dark:hover:bg-indigo-900"
+                >
+                  Ready to go live? Subscribe →
+                </a>
               </div>
             </div>
           </div>

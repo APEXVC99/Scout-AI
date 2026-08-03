@@ -126,14 +126,23 @@ function AppLayout() {
           {/* User Section */}
           <div className="border-t border-indigo-100/70 p-4 dark:border-indigo-950">
             {tier && (
-              <div className="mb-3 flex items-center gap-2 rounded-lg bg-gradient-to-r from-indigo-50 to-violet-50 px-3 py-2 dark:from-indigo-950/60 dark:to-violet-950/60">
+              <a
+                href="https://www.getscoutai.app/#pricing"
+                className="group mb-3 flex items-center gap-2 rounded-lg bg-gradient-to-r from-indigo-50 to-violet-50 px-3 py-2 transition hover:from-indigo-100 hover:to-violet-100 dark:from-indigo-950/60 dark:to-violet-950/60 dark:hover:from-indigo-950 dark:hover:to-violet-900"
+                aria-label={`View ${TIER_LABELS[tier]} plan pricing`}
+              >
                 <span className="flex h-5 w-5 items-center justify-center rounded-md bg-gradient-to-br from-indigo-600 via-violet-600 to-fuchsia-500 text-[10px] font-bold text-white">
                   {TIER_LABELS[tier][0]}
                 </span>
-                <span className="text-xs font-semibold text-indigo-700 dark:text-indigo-300">
-                  {TIER_LABELS[tier]} Plan
+                <span className="flex min-w-0 flex-1 items-center justify-between gap-2">
+                  <span className="text-xs font-semibold text-indigo-700 dark:text-indigo-300">
+                    {TIER_LABELS[tier]} Plan
+                  </span>
+                  <span className="whitespace-nowrap text-[11px] font-medium text-indigo-500 transition group-hover:text-indigo-700 dark:text-indigo-400 dark:group-hover:text-indigo-200">
+                    Upgrade plan →
+                  </span>
                 </span>
-              </div>
+              </a>
             )}
             <div className="flex items-center gap-3">
               <UserButton
