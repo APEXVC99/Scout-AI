@@ -74,6 +74,30 @@ that never sleeps
 <p class="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-gray-600 sm:text-xl">
 Scout AI deploys autonomous AI agents that source investment deals around the clock — scraping databases, tracking founder movements, building investment theses and deal memos, and sending personalized outreach. Top-tier deal flow, without the top-tier headcount.
 </p>
+<!-- Countdown -->
+<div class="mx-auto mt-8 max-w-md"><div class="rounded-2xl border-2 border-orange-200 bg-gradient-to-br from-orange-50 to-amber-50 p-4 shadow-sm"><p class="text-xs font-bold uppercase tracking-widest text-orange-600">🍊 Launching on Product Hunt</p><div class="mt-3 flex justify-center gap-3 text-center"><div class="min-w-[60px] rounded-xl bg-white px-3 py-2 shadow-sm"><span class="text-2xl font-black text-orange-600" id="countdown-days">02</span><p class="text-[10px] font-semibold uppercase tracking-wider text-slate-400">Days</p></div><div class="min-w-[60px] rounded-xl bg-white px-3 py-2 shadow-sm"><span class="text-2xl font-black text-orange-600" id="countdown-hours">00</span><p class="text-[10px] font-semibold uppercase tracking-wider text-slate-400">Hours</p></div><div class="min-w-[60px] rounded-xl bg-white px-3 py-2 shadow-sm"><span class="text-2xl font-black text-orange-600" id="countdown-mins">00</span><p class="text-[10px] font-semibold uppercase tracking-wider text-slate-400">Mins</p></div><div class="min-w-[60px] rounded-xl bg-white px-3 py-2 shadow-sm"><span class="text-2xl font-black text-orange-600" id="countdown-secs">00</span><p class="text-[10px] font-semibold uppercase tracking-wider text-slate-400">Secs</p></div></div><p class="mt-2 text-xs text-orange-700">Wednesday, August 5 · <span class="font-bold">20% off</span> launch pricing</p></div></div>
+<script>
+(function(){
+var target = new Date("2026-08-05T00:00:01-07:00").getTime();
+function pad(n){return n<10?"0"+n:n}
+function tick(){
+var now = Date.now();
+var d = Math.max(0,Math.floor((target-now)/864e5));
+var h = Math.max(0,Math.floor((target-now)/36e5)%24);
+var m = Math.max(0,Math.floor((target-now)/6e4)%60);
+var s = Math.max(0,Math.floor((target-now)/1e3)%60);
+var days=document.getElementById("countdown-days");
+var hours=document.getElementById("countdown-hours");
+var mins=document.getElementById("countdown-mins");
+var secs=document.getElementById("countdown-secs");
+if(days)days.textContent=pad(d);
+if(hours)hours.textContent=pad(h);
+if(mins)mins.textContent=pad(m);
+if(secs)secs.textContent=pad(s);
+}
+tick();setInterval(tick,1000);
+})();
+</script>
 <div class="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
 <a href="/sign-up" class="btn-gradient inline-flex items-center gap-2 rounded-xl px-6 py-3 text-base font-semibold">
 Get Started Free
@@ -196,6 +220,9 @@ See how it works <span class="text-lg">→</span>
 <p class="mt-1 text-sm text-orange-700">Use the links below — launch pricing ends soon.</p>
 </div>
 </div>
+
+<!-- ROI Comparison -->
+<section class="px-6 pt-6"><div class="mx-auto max-w-4xl"><div class="overflow-hidden rounded-2xl border-2 border-emerald-200 bg-white shadow-lg"><div class="bg-gradient-to-r from-emerald-600 to-teal-600 px-6 py-4 text-center"><span class="text-sm font-bold uppercase tracking-wider text-white">The Math VCs Understand</span></div><div class="overflow-x-auto"><table class="w-full text-left text-sm"><thead class="border-b border-emerald-100 bg-emerald-50/50"><tr><th class="px-6 py-3 font-semibold text-slate-700"></th><th class="px-6 py-3 font-semibold text-slate-700">Junior Analyst</th><th class="px-6 py-3 font-bold text-emerald-700">Scout AI (Solo)</th></tr></thead><tbody class="divide-y divide-slate-100"><tr><td class="px-6 py-3 font-medium text-slate-700">Annual cost</td><td class="px-6 py-3 text-slate-600">$85,000 – $140,000</td><td class="px-6 py-3 font-bold text-emerald-700">$5,988</td></tr><tr class="bg-emerald-50/30"><td class="px-6 py-3 font-medium text-slate-700">Hours per week</td><td class="px-6 py-3 text-slate-600">40–50 (with breaks &amp; meetings)</td><td class="px-6 py-3 font-bold text-emerald-700">168 (24/7, no sleep)</td></tr><tr><td class="px-6 py-3 font-medium text-slate-700">Companies scanned / day</td><td class="px-6 py-3 text-slate-600">10–30 (manual)</td><td class="px-6 py-3 font-bold text-emerald-700">Hundreds (automated)</td></tr><tr class="bg-emerald-50/30"><td class="px-6 py-3 font-medium text-slate-700">Deal memo turnaround</td><td class="px-6 py-3 text-slate-600">1–3 days</td><td class="px-6 py-3 font-bold text-emerald-700">~30 seconds</td></tr><tr><td class="px-6 py-3 font-medium text-slate-700">Personalized outreach</td><td class="px-6 py-3 text-slate-600">3–5 / week</td><td class="px-6 py-3 font-bold text-emerald-700">Unlimited drafts</td></tr><tr class="bg-emerald-50/30"><td class="px-6 py-3 font-medium text-slate-700">Onboarding time</td><td class="px-6 py-3 text-slate-600">2–4 weeks</td><td class="px-6 py-3 font-bold text-emerald-700">5 minutes</td></tr></tbody></table></div><div class="bg-slate-50 px-6 py-4 text-center"><p class="text-sm text-slate-600"><span class="font-bold text-emerald-700">23× cheaper</span> than a junior analyst. <span class="font-bold text-emerald-700">4.2× more coverage.</span> And it never takes vacation.</p></div></div></div></section>
 
 <!-- Pricing -->
 <section id="pricing" class="px-6 pt-10 pb-24 sm:pt-12 sm:pb-32">
