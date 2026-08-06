@@ -12,6 +12,10 @@ export interface SendOutreachEmailInput {
   to: string;
   subject: string;
   body: string;
+  /** Optional CC recipients (e.g. the owner's address for transactional copies). */
+  cc?: string[];
+  /** Optional BCC recipients. */
+  bcc?: string[];
 }
 
 export interface SendOutreachEmailResult {
@@ -24,8 +28,12 @@ export interface SendOutreachEmailResult {
  * Core implementation: send a plain-text email via Resend.
  * Errors are caught and returned — never thrown — so callers (and the
  * web UI) can surface them without crashing the request.
+ *
+ * Exported for server-to-server callers (e.g. the Stripe webhook route) that
+ * run outside a server-function RPC context, where invoking the createServerFn
+ * directly throws "Server function info not found".
  */
-async function sendEmailImpl(data: SendOutreachEmailInput): Promise<SendOutreachEmailResult> {
+export async function sendEmailImpl(data: SendOutreachEmailInput): Promise<SendOutreachEmailResult> {
   const apiKey = process.env.RESEND_API_KEY;
   if (!apiKey) {
     return { success: false, error: "RESEND_API_KEY is not set — connect a Resend API key before sending email." };
@@ -39,6 +47,8 @@ async function sendEmailImpl(data: SendOutreachEmailInput): Promise<SendOutreach
       to: [data.to],
       subject: data.subject,
       text: data.body,
+      ...(data.cc?.length ? { cc: data.cc } : {}),
+      ...(data.bcc?.length ? { bcc: data.bcc } : {}),
     });
     if (result.error) {
       return { success: false, error: result.error.message };
@@ -60,11 +70,23 @@ async function sendEmailImpl(data: SendOutreachEmailInput): Promise<SendOutreach
 const sendOutreachEmailFn = createServerFn({ method: "POST" })
   .validator((input: unknown) => {
     if (typeof input !== "object" || input === null) throw new Error("Invalid input");
-    const { to, subject, body } = input as Record<string, unknown>;
+    const { to, subject, body, cc, bcc } = input as Record<string, unknown>;
     if (typeof to !== "string" || !to.trim()) throw new Error("Recipient email is required");
     if (typeof subject !== "string" || !subject.trim()) throw new Error("Subject is required");
     if (typeof body !== "string" || !body.trim()) throw new Error("Body is required");
-    return { to: to.trim(), subject: subject.trim(), body: body.trim() } satisfies SendOutreachEmailInput;
+    const cleanList = (v: unknown): string[] | undefined =>
+      Array.isArray(v)
+        ? v.filter((x): x is string => typeof x === "string" && x.trim().length > 0).map((x) => x.trim())
+        : undefined;
+    const ccList = cleanList(cc);
+    const bccList = cleanList(bcc);
+    return {
+      to: to.trim(),
+      subject: subject.trim(),
+      body: body.trim(),
+      ...(ccList?.length ? { cc: ccList } : {}),
+      ...(bccList?.length ? { bcc: bccList } : {}),
+    } satisfies SendOutreachEmailInput;
   })
   .handler(async ({ data }: { data: SendOutreachEmailInput }): Promise<SendOutreachEmailResult> => {
     return sendEmailImpl(data);
