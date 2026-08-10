@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Run Your Thesis — Scout AI Live Pipeline</title>
+<meta name="description" content="Submit your investment thesis and Scout AI will run it through our live pipeline — scraping today's startup news, scoring every company against your thesis, and writing AI deal memos for the strongest matches. No signup required.">
+<meta property="og:title" content="Run Your Thesis — Scout AI Live Pipeline">
+<meta property="og:description" content="Submit your investment thesis and our agents will score today's startups against it and write deal memos — no signup required.">
+<meta property="og:image" content="https://www.getscoutai.app/og-image.png">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="icon" type="image/x-icon" href="/favicon.ico">
+<script src="https://cdn.tailwindcss.com"></script>
+<script>tailwind.config={darkMode:'class',theme:{extend:{fontFamily:{sans:['Inter','ui-sans-serif','system-ui']}}}}</script>
+<style>
+body{font-family:Inter,ui-sans-serif,system-ui;background:radial-gradient(1100px 520px at 85% -10%,rgba(168,85,247,.16),transparent 60%),radial-gradient(900px 480px at 0% 0%,rgba(79,70,229,.22),transparent 55%),radial-gradient(800px 600px at 50% 110%,rgba(6,182,212,.1),transparent 60%),#0f172a}
+.text-gradient{background-image:linear-gradient(100deg,#4f46e5 0%,#7c3aed 45%,#0891b2 100%);-webkit-background-clip:text;background-clip:text;color:transparent}
+.btn-gradient{background-image:linear-gradient(100deg,#4f46e5 0%,#7c3aed 55%,#a855f7 100%);color:#fff;box-shadow:0 8px 24px -8px rgba(124,58,237,.55);transition:transform 150ms ease,box-shadow 150ms ease,filter 150ms ease}
+.btn-gradient:hover{transform:translateY(-1px);box-shadow:0 12px 32px -8px rgba(124,58,237,.65);filter:brightness(1.08)}
+.btn-gradient:disabled{opacity:.6;cursor:not-allowed;transform:none;filter:none}
+.field{width:100%;border-radius:.75rem;border:1px solid #334155;background:rgba(15,23,42,.6);padding:.65rem .9rem;font-size:.9rem;color:#e2e8f0;outline:none;transition:border-color 150ms ease,box-shadow 150ms ease}
+.field:focus{border-color:#7c3aed;box-shadow:0 0 0 3px rgba(124,58,237,.25)}
+.field::placeholder{color:#64748b}
+.chip{cursor:pointer;border:1px solid #334155;background:rgba(30,41,59,.5);color:#94a3b8;border-radius:9999px;padding:.3rem .8rem;font-size:.75rem;font-weight:600;transition:all 150ms ease}
+.chip:hover{border-color:#7c3aed;color:#c4b5fd;background:rgba(124,58,237,.12)}
+.spinner{width:1.1rem;height:1.1rem;border:2px solid rgba(255,255,255,.35);border-top-color:#fff;border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+</style>
+<script defer src="https://cloud.umami.is/script.js" data-website-id="6817ec81-cc23-4501-b405-dec5b77f011a"></script>
+</head>
+<body class="min-h-screen text-slate-200 antialiased">
+<header class="border-b border-slate-800/70 bg-slate-950/40 backdrop-blur-md"><div class="mx-auto flex h-16 max-w-4xl items-center justify-between px-5 sm:px-8"><a href="/" class="flex items-center gap-2 font-bold tracking-tight"><img src="/logo.svg" class="h-8 w-8" alt="Scout AI"><span class="text-gradient text-lg">Scout AI</span></a><a href="/" class="text-sm font-medium text-slate-400 hover:text-indigo-400">← Back to home</a></div></header>
+
+<main class="mx-auto max-w-4xl px-5 py-10 sm:px-8 sm:py-14">
+  <div class="mx-auto max-w-2xl text-center">
+    <span class="inline-flex items-center gap-2 rounded-full border border-indigo-500/30 bg-indigo-500/10 px-3 py-1 text-xs font-semibold text-indigo-300"><span class="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-400"></span>Live pipeline · no signup</span>
+    <h1 class="mt-5 text-3xl font-bold tracking-tight text-white sm:text-4xl">Run your thesis through <span class="text-gradient">Scout AI</span></h1>
+    <p class="mt-3 text-sm leading-relaxed text-slate-400 sm:text-base">We'll scrape today's startup news, score every company against your thesis, and write AI deal memos for the strongest matches. This is the real thing — our agents working for you.</p>
+  </div>
+
+  <div class="mx-auto mt-10 max-w-2xl rounded-2xl border border-slate-800 bg-slate-900/60 p-6 shadow-2xl shadow-indigo-950/40 sm:p-8">
+    <form id="trial-form" class="space-y-5" novalidate>
+      <div>
+        <label for="t-name" class="mb-1.5 block text-sm font-semibold text-slate-300">Thesis name</label>
+        <input id="t-name" name="name" type="text" required maxlength="120" class="field" placeholder="e.g. AI Infrastructure for Autonomous Agents">
+      </div>
+      <div>
+        <label for="t-desc" class="mb-1.5 block text-sm font-semibold text-slate-300">Description</label>
+        <textarea id="t-desc" name="description" required rows="4" maxlength="1500" class="field resize-none" placeholder="What are you looking for? Sectors, business models, team signals, what excites you…"></textarea>
+      </div>
+      <div class="grid gap-5 sm:grid-cols-2">
+        <div>
+          <label for="t-sectors" class="mb-1.5 block text-sm font-semibold text-slate-300">Sectors <span class="font-normal text-slate-500">(comma-separated)</span></label>
+          <input id="t-sectors" name="sectors" type="text" required maxlength="200" class="field" placeholder="ai infrastructure, developer tools">
+        </div>
+        <div>
+          <label for="t-stages" class="mb-1.5 block text-sm font-semibold text-slate-300">Stages <span class="font-normal text-slate-500">(comma-separated)</span></label>
+          <input id="t-stages" name="stages" type="text" required maxlength="120" class="field" placeholder="seed, series a">
+        </div>
+      </div>
+
+      <div>
+        <p class="mb-2 text-xs font-semibold uppercase tracking-wider text-slate-500">Or start from an example</p>
+        <div class="flex flex-wrap gap-2" id="example-chips"></div>
+      </div>
+
+      <div id="form-error" class="hidden rounded-lg border border-rose-500/40 bg-rose-500/10 px-4 py-3 text-sm text-rose-300"></div>
+
+      <button id="run-btn" type="submit" class="btn-gradient flex w-full items-center justify-center gap-2 rounded-xl px-5 py-3 text-sm font-bold">
+        <span>Run Scan</span><span aria-hidden="true">→</span>
+      </button>
+      <p class="text-center text-xs text-slate-500">Takes ~30–60 seconds. Memos are written after the scan — your results link stays live so you can come back or share it.</p>
+    </form>
+  </div>
+
+  <div class="mx-auto mt-8 grid max-w-2xl gap-3 text-center text-xs text-slate-500 sm:grid-cols-3">
+    <div class="rounded-xl border border-slate-800 bg-slate-900/40 px-3 py-3"><span class="font-bold text-slate-300">1. Scan</span><br>Live TechCrunch + VentureBeat feeds</div>
+    <div class="rounded-xl border border-slate-800 bg-slate-900/40 px-3 py-3"><span class="font-bold text-slate-300">2. Match</span><br>Vector similarity vs. your thesis</div>
+    <div class="rounded-xl border border-slate-800 bg-slate-900/40 px-3 py-3"><span class="font-bold text-slate-300">3. Memos</span><br>GPT-4o deal memos with SWOT + verdict</div>
+  </div>
+</main>
+
+<footer class="mx-auto max-w-4xl px-5 pb-10 text-center text-xs text-slate-600 sm:px-8">Scout AI · <a href="/" class="text-indigo-500 hover:underline">getscoutai.app</a> · <a href="/terms" class="text-indigo-500 hover:underline">Terms</a> · <a href="/privacy" class="text-indigo-500 hover:underline">Privacy</a></footer>
+
+<script>
+const EXAMPLES = [
+  {
+    name: "AI Infrastructure",
+    desc: "We invest in foundational AI infrastructure — compute platforms, model deployment and orchestration, vector databases, AI observability, and developer tools. We look for strong technical teams, real enterprise usage, and open-source-friendly business models.",
+    sectors: "ai infrastructure, developer tools, databases, observability",
+    stages: "seed, series a",
+  },
+  {
+    name: "Climate & Energy Transition",
+    desc: "We back startups electrifying the economy — grid software, battery storage, carbon accounting, heat pumps, and industrial efficiency. We look for regulatory tailwinds, clear unit economics, and teams with deep domain expertise.",
+    sectors: "climate, energy, hardware, software",
+    stages: "seed, series a, series b",
+  },
+  {
+    name: "Vertical AI for Healthcare",
+    desc: "We invest in AI applied to healthcare workflows — clinical documentation, prior authorization, medical coding, and patient engagement. We look for defensible data moats, HIPAA-ready products, and traction with providers or payers.",
+    sectors: "healthcare, ai, saas",
+    stages: "seed, series a",
+  },
+  {
+    name: "DevTools & Open Source",
+    desc: "We back developer tools and open-source companies — CI/CD, security, observability, and AI-assisted coding. We favor bottom-up adoption, strong community traction, and a clear path to enterprise revenue.",
+    sectors: "developer tools, open source, security, ai",
+    stages: "seed, series a",
+  },
+];
+
+const chipsEl = document.getElementById("example-chips");
+for (const ex of EXAMPLES) {
+  const b = document.createElement("button");
+  b.type = "button";
+  b.className = "chip";
+  b.textContent = ex.name;
+  b.addEventListener("click", () => {
+    document.getElementById("t-name").value = ex.name;
+    document.getElementById("t-desc").value = ex.desc;
+    document.getElementById("t-sectors").value = ex.sectors;
+    document.getElementById("t-stages").value = ex.stages;
+  });
+  chipsEl.appendChild(b);
+}
+
+const form = document.getElementById("trial-form");
+const btn = document.getElementById("run-btn");
+const errBox = document.getElementById("form-error");
+
+function showError(msg) {
+  errBox.textContent = msg;
+  errBox.classList.remove("hidden");
+}
+function hideError() { errBox.classList.add("hidden"); }
+
+form.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  hideError();
+  const name = document.getElementById("t-name").value.trim();
+  const description = document.getElementById("t-desc").value.trim();
+  const sectorsRaw = document.getElementById("t-sectors").value.trim();
+  const stagesRaw = document.getElementById("t-stages").value.trim();
+  if (!name || !description || !sectorsRaw || !stagesRaw) { showError("Please fill in all fields."); return; }
+
+  const sectors = [...new Set(sectorsRaw.split(",").map((s) => s.trim().toLowerCase()).filter(Boolean))];
+  const stages = [...new Set(stagesRaw.split(",").map((s) => s.trim().toLowerCase()).filter(Boolean))];
+  if (sectors.length === 0 || stages.length === 0) { showError("Enter at least one sector and one stage."); return; }
+
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span><span>Scanning live feeds &amp; scoring companies…</span>';
+  try {
+    const res = await fetch("/api/trial/run", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name, description, sectors, stages }),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok || !data.thesisId) {
+      showError(data.error || "Something went wrong. Please try again.");
+      btn.disabled = false;
+      btn.innerHTML = "<span>Run Scan</span><span aria-hidden=\"true\">→</span>";
+      return;
+    }
+    try { localStorage.setItem("scoutai_last_trial", JSON.stringify({ thesisId: data.thesisId, name, at: Date.now() })); } catch {}
+    window.location.href = "/trial/results?thesisId=" + encodeURIComponent(data.thesisId);
+  } catch (err) {
+    showError("Network error — please try again.");
+    btn.disabled = false;
+    btn.innerHTML = "<span>Run Scan</span><span aria-hidden=\"true\">→</span>";
+  }
+});
+</script>
+</body>
+</html>
