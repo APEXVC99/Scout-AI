@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { sql } from "~/db";
-import { sendEmailImpl } from "./-email-actions";
+import { sendWelcomeEmail } from "~/lib/purchase";
 import {
   extractPurchase,
   verifyStripeSignature,
@@ -97,26 +97,12 @@ async function handleStripeWebhook(request: Request): Promise<Response> {
     // Only email on the first record — Stripe retries the same session id after
     // a timeout, and we don't want to spam the customer with duplicate welcomes.
     if (inserted.length > 0) {
-      const welcomeUrl = "https://www.getscoutai.app/welcome";
-      // Direct implementation, NOT the exported createServerFn wrapper: this raw
+      // Direct implementation (not the exported createServerFn wrapper): this raw
       // API route runs outside a server-function RPC context, where invoking
       // the server fn throws "Server function info not found".
-      const emailResult = await sendEmailImpl({
+      const emailResult = await sendWelcomeEmail({
         to: purchase.email,
-        subject: "Welcome to Scout AI! 🎉",
-        body: [
-          `Welcome to Scout AI!`,
-          ``,
-          `You purchased the ${purchase.productName} plan. Here's your next step:`,
-          ``,
-          welcomeUrl,
-          ``,
-          `Create your account with the same email you used at checkout, complete`,
-          `the 3-step onboarding, and your agent will start sourcing deals for you.`,
-          ``,
-          `— The Scout AI team`,
-        ].join("\n"),
-        bcc: ["hello@getscoutai.app"],
+        productName: purchase.productName,
       });
       if (!emailResult.success) {
         // Purchase is recorded; email failure must not fail the webhook (Stripe

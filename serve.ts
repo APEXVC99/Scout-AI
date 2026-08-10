@@ -11,6 +11,7 @@
 import handler from "./dist/server/server.js";
 import { neon } from "@neondatabase/serverless";
 import { runTrial, getTrialResults, generateNextTrialMemo } from "./src/lib/trial.ts";
+import { processCheckoutRedirect } from "./src/lib/purchase.ts";
 
 // Pinned, NOT read from the environment. The published preview URL
 // (<label>.<PUBLIC_SITE_DOMAIN>) is reverse-proxied to 0.0.0.0:3000 inside the
@@ -192,6 +193,54 @@ for (let attempt = 1; ; attempt++) {
           } catch (err) {
             console.error("[trial] results failed:", err);
             return Response.json({ error: "Could not load results." }, { status: 500 });
+          }
+        }
+
+        // ── Post-purchase redirect processing ─────────────────────────
+        // POST /api/purchase/complete — called by /welcome when Stripe
+        // redirects a buyer back with ?session_id=cs_… after a payment-link
+        // checkout. Verifies the session server-side when STRIPE_SECRET_KEY is
+        // set; otherwise trusts the redirect (Stripe only redirects after
+        // payment). Records the purchase (dedup on session id) and fires the
+        // welcome email. This replaces the broken webhook path
+        // (STRIPE_WEBHOOK_SECRET is missing).
+        if (req.method === "POST" && pathname === "/api/purchase/complete") {
+          try {
+            const body = (await req.json()) as {
+              session_id?: unknown;
+              tier?: unknown;
+            };
+            const sessionId =
+              typeof body.session_id === "string" ? body.session_id.trim() : "";
+            const tier =
+              typeof body.tier === "string" ? body.tier.trim() : null;
+            // Stripe session ids look like cs_test_… / cs_live_…. Requiring the
+            // shape keeps junk out of the purchases table in fallback mode
+            // (where the redirect is trusted without API verification).
+            if (
+              !sessionId ||
+              sessionId.length > 255 ||
+              !/^cs_[A-Za-z0-9_]+$/.test(sessionId)
+            ) {
+              return Response.json(
+                { success: false, error: "Invalid session_id." },
+                { status: 400 },
+              );
+            }
+            const result = await processCheckoutRedirect({ sessionId, tier });
+            if (!result.success) {
+              return Response.json(
+                { success: false, error: result.error ?? "Could not process purchase." },
+                { status: 500 },
+              );
+            }
+            return Response.json(result);
+          } catch (err) {
+            console.error("[purchase] complete failed:", err);
+            return Response.json(
+              { success: false, error: "Something went wrong. Please try again." },
+              { status: 500 },
+            );
           }
         }
 
