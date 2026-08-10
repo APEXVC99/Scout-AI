@@ -10,6 +10,7 @@
 // the takeover works across user boundaries.
 import handler from "./dist/server/server.js";
 import { neon } from "@neondatabase/serverless";
+import { runTrial, getTrialResults, generateNextTrialMemo } from "./src/lib/trial.ts";
 
 // Pinned, NOT read from the environment. The published preview URL
 // (<label>.<PUBLIC_SITE_DOMAIN>) is reverse-proxied to 0.0.0.0:3000 inside the
@@ -19,6 +20,46 @@ import { neon } from "@neondatabase/serverless";
 const PORT = 3000;
 const HOST = "0.0.0.0";
 const CLIENT_DIR = `${import.meta.dir}/dist/client`;
+
+// Public static pages served before Clerk SSR so visitors can explore without auth.
+const STATIC_PAGES: Record<string, string> = {
+  "/": "/landing.html",
+  "/demo": "/demo.html",
+  "/welcome": "/welcome.html",
+  "/sample-memo": "/sample-memo.html",
+  "/digest": "/digest.html",
+  "/trial": "/trial.html",
+  "/trial/results": "/trial-results.html",
+};
+
+// ── Public trial API: in-memory rate limiting (single-process Bun server) ──
+// Each trial run costs real OpenAI calls, so cap usage per IP. Cheap and
+// sufficient for v1; swap for a DB-backed limiter if the site ever scales out.
+const trialRunHits = new Map<string, number[]>();
+const trialMemoHits = new Map<string, number[]>();
+
+function rateLimit(
+  map: Map<string, number[]>,
+  key: string,
+  max: number,
+  windowMs: number,
+): boolean {
+  const now = Date.now();
+  const hits = (map.get(key) ?? []).filter((t) => now - t < windowMs);
+  if (hits.length >= max) {
+    map.set(key, hits);
+    return false;
+  }
+  hits.push(now);
+  map.set(key, hits);
+  return true;
+}
+
+function clientIp(req: Request): string {
+  const fwd = req.headers.get("x-forwarded-for");
+  if (fwd) return fwd.split(",")[0]!.trim();
+  return "local";
+}
 
 // Free PORT regardless of which user owns the current listener. lsof runs under
 // sudo so it can see (and the kill can signal) a process owned by another user;
@@ -72,9 +113,91 @@ for (let attempt = 1; ; attempt++) {
           }
         }
 
+        // ── Public trial pipeline API (no auth) ──────────────────────────
+        // POST /api/trial/run — create thesis, scrape feeds, embed, match.
+        if (req.method === "POST" && pathname === "/api/trial/run") {
+          try {
+            if (!rateLimit(trialRunHits, clientIp(req), 5, 60 * 60 * 1000)) {
+              return Response.json(
+                { error: "You've reached the free trial limit for now — please try again in a bit." },
+                { status: 429 },
+              );
+            }
+            const body = await req.json() as Record<string, unknown>;
+            const name = typeof body.name === "string" ? body.name.trim() : "";
+            const description = typeof body.description === "string" ? body.description.trim() : "";
+            const sectorsRaw = Array.isArray(body.sectors)
+              ? body.sectors.filter((s): s is string => typeof s === "string")
+              : [];
+            const stagesRaw = Array.isArray(body.stages)
+              ? body.stages.filter((s): s is string => typeof s === "string")
+              : [];
+            const sectors = [...new Set(sectorsRaw.map((s) => s.trim().toLowerCase()).filter(Boolean))];
+            const stages = [...new Set(stagesRaw.map((s) => s.trim().toLowerCase()).filter(Boolean))];
+
+            if (!name || name.length > 120) {
+              return Response.json({ error: "Please provide a thesis name (max 120 characters)." }, { status: 400 });
+            }
+            if (!description || description.length > 1500) {
+              return Response.json({ error: "Please provide a thesis description (max 1500 characters)." }, { status: 400 });
+            }
+            if (sectors.length === 0) {
+              return Response.json({ error: "Please provide at least one sector." }, { status: 400 });
+            }
+            if (stages.length === 0) {
+              return Response.json({ error: "Please provide at least one stage." }, { status: 400 });
+            }
+
+            const result = await runTrial({ name, description, sectors, stages });
+            return Response.json(result);
+          } catch (err) {
+            console.error("[trial] run failed:", err);
+            return Response.json({ error: "Scan failed — please try again in a moment." }, { status: 500 });
+          }
+        }
+
+        // POST /api/trial/memo — generate the next deal memo for a trial.
+        if (req.method === "POST" && pathname === "/api/trial/memo") {
+          try {
+            if (!rateLimit(trialMemoHits, clientIp(req), 15, 60 * 60 * 1000)) {
+              return Response.json(
+                { error: "Memo generation limit reached — please try again in a bit." },
+                { status: 429 },
+              );
+            }
+            const body = await req.json() as { thesisId?: unknown };
+            if (typeof body.thesisId !== "string" || !body.thesisId) {
+              return Response.json({ error: "Missing thesisId" }, { status: 400 });
+            }
+            const result = await generateNextTrialMemo(body.thesisId);
+            return Response.json(result);
+          } catch (err) {
+            console.error("[trial] memo failed:", err);
+            return Response.json({ error: "Memo generation failed — please try again." }, { status: 500 });
+          }
+        }
+
+        // GET /api/trial/results?thesisId=… — fetch a trial's matches + memos.
+        if (req.method === "GET" && pathname === "/api/trial/results") {
+          try {
+            const thesisId = new URL(req.url).searchParams.get("thesisId");
+            if (!thesisId) {
+              return Response.json({ error: "Missing thesisId" }, { status: 400 });
+            }
+            const results = await getTrialResults(thesisId);
+            if (!results) {
+              return Response.json({ error: "Trial not found" }, { status: 404 });
+            }
+            return Response.json(results);
+          } catch (err) {
+            console.error("[trial] results failed:", err);
+            return Response.json({ error: "Could not load results." }, { status: 500 });
+          }
+        }
+
         // Serve public static pages before Clerk SSR so visitors can explore without auth.
-        if (pathname === "/" || pathname === "/demo" || pathname === "/welcome" || pathname === "/sample-memo" || pathname === "/digest") {
-          const pageName = pathname === "/" ? "/landing.html" : pathname === "/demo" ? "/demo.html" : pathname === "/welcome" ? "/welcome.html" : pathname === "/sample-memo" ? "/sample-memo.html" : "/digest.html";
+        const pageName = STATIC_PAGES[pathname];
+        if (pageName) {
           const page = Bun.file(CLIENT_DIR + pageName);
           if (await page.exists()) {
             return new Response(page, {
@@ -82,7 +205,7 @@ for (let attempt = 1; ; attempt++) {
             });
           }
         }
-        if (pathname !== "/" && pathname !== "/demo" && pathname !== "/welcome" && pathname !== "/sample-memo" && pathname !== "/digest") {
+        if (!(pathname in STATIC_PAGES)) {
           const file = Bun.file(CLIENT_DIR + pathname);
           if (await file.exists()) return new Response(file);
         }

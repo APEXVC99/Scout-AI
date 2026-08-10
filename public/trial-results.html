@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Your Results — Scout AI Live Pipeline</title>
+<meta name="description" content="Scored matches and AI-generated deal memos from your thesis run through the Scout AI live pipeline.">
+<meta property="og:title" content="Your Results — Scout AI Live Pipeline">
+<meta property="og:description" content="Scored matches and AI-generated deal memos from your thesis run through the Scout AI live pipeline.">
+<meta property="og:image" content="https://www.getscoutai.app/og-image.png">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="icon" type="image/x-icon" href="/favicon.ico">
+<script src="https://cdn.tailwindcss.com"></script>
+<script>tailwind.config={darkMode:'class',theme:{extend:{fontFamily:{sans:['Inter','ui-sans-serif','system-ui']}}}}</script>
+<style>
+body{font-family:Inter,ui-sans-serif,system-ui;background:radial-gradient(1100px 520px at 85% -10%,rgba(168,85,247,.16),transparent 60%),radial-gradient(900px 480px at 0% 0%,rgba(79,70,229,.22),transparent 55%),radial-gradient(800px 600px at 50% 110%,rgba(6,182,212,.1),transparent 60%),#0f172a}
+.text-gradient{background-image:linear-gradient(100deg,#4f46e5 0%,#7c3aed 45%,#0891b2 100%);-webkit-background-clip:text;background-clip:text;color:transparent}
+.btn-gradient{background-image:linear-gradient(100deg,#4f46e5 0%,#7c3aed 55%,#a855f7 100%);color:#fff;box-shadow:0 8px 24px -8px rgba(124,58,237,.55);transition:transform 150ms ease,box-shadow 150ms ease,filter 150ms ease}
+.btn-gradient:hover{transform:translateY(-1px);box-shadow:0 12px 32px -8px rgba(124,58,237,.65);filter:brightness(1.08)}
+.score-high{color:#6ee7b7;background:rgba(16,185,129,.15);border:1px solid rgba(16,185,129,.35)}
+.score-mid{color:#fcd34d;background:rgba(245,158,11,.15);border:1px solid rgba(245,158,11,.35)}
+.score-low{color:#94a3b8;background:rgba(100,116,139,.15);border:1px solid rgba(100,116,139,.35)}
+.rec-strong_buy{color:#6ee7b7;background:rgba(16,185,129,.18);border:1px solid rgba(16,185,129,.45)}
+.rec-buy{color:#67e8f9;background:rgba(6,182,212,.18);border:1px solid rgba(6,182,212,.45)}
+.rec-hold{color:#fcd34d;background:rgba(245,158,11,.18);border:1px solid rgba(245,158,11,.45)}
+.rec-pass{color:#fda4af;background:rgba(244,63,94,.15);border:1px solid rgba(244,63,94,.4)}
+.badge{display:inline-flex;align-items:center;gap:.35rem;border-radius:9999px;padding:.22rem .7rem;font-size:.72rem;font-weight:700}
+.spinner{width:1.1rem;height:1.1rem;border:2px solid rgba(255,255,255,.35);border-top-color:#fff;border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.memo-md h3{font-size:.85rem;font-weight:700;color:#e2e8f0;margin:1.1rem 0 .45rem;letter-spacing:.01em}
+.memo-md p{font-size:.82rem;line-height:1.65;color:#94a3b8;margin:.4rem 0}
+.memo-md ul{margin:.4rem 0 .4rem 1rem;list-style:disc}
+.memo-md li{font-size:.82rem;line-height:1.6;color:#94a3b8;margin:.18rem 0}
+.memo-md strong{color:#e2e8f0}
+.memo-md em{color:#cbd5e1}
+.memo-md code{background:rgba(30,41,59,.8);border:1px solid #334155;border-radius:.3rem;padding:.05rem .3rem;font-size:.75rem;color:#fcd34d}
+.match-row{cursor:pointer;transition:background 150ms ease,border-color 150ms ease}
+.match-row:hover{background:rgba(51,65,85,.35)}
+</style>
+<script defer src="https://cloud.umami.is/script.js" data-website-id="6817ec81-cc23-4501-b405-dec5b77f011a"></script>
+</head>
+<body class="min-h-screen text-slate-200 antialiased">
+<header class="border-b border-slate-800/70 bg-slate-950/40 backdrop-blur-md"><div class="mx-auto flex h-16 max-w-5xl items-center justify-between px-5 sm:px-8"><a href="/" class="flex items-center gap-2 font-bold tracking-tight"><img src="/logo.svg" class="h-8 w-8" alt="Scout AI"><span class="text-gradient text-lg">Scout AI</span></a><div class="flex items-center gap-4"><a href="/trial" class="text-sm font-medium text-slate-400 hover:text-indigo-400">Run another thesis</a><a href="/#pricing" class="rounded-lg border border-indigo-500/40 bg-indigo-500/10 px-3.5 py-1.5 text-sm font-semibold text-indigo-300 hover:bg-indigo-500/20">Get Scout AI</a></div></div></header>
+
+<main class="mx-auto max-w-5xl px-5 py-10 sm:px-8">
+  <div id="loading" class="mx-auto max-w-md py-24 text-center">
+    <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl border border-indigo-500/30 bg-indigo-500/10"><span class="spinner"></span></div>
+    <p class="mt-4 text-sm font-semibold text-slate-300">Loading your scan results…</p>
+    <p class="mt-1 text-xs text-slate-500">Deal memos are generated live — this can take a minute.</p>
+  </div>
+
+  <div id="no-scan" class="hidden mx-auto max-w-md py-24 text-center">
+    <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl border border-slate-700 bg-slate-800/60 text-xl">🔍</div>
+    <h1 class="mt-4 text-xl font-bold text-white">No scan yet</h1>
+    <p class="mt-2 text-sm text-slate-400">Run your investment thesis through our live pipeline to see scored matches and AI deal memos.</p>
+    <a href="/trial" class="btn-gradient mt-6 inline-flex items-center gap-2 rounded-xl px-5 py-3 text-sm font-bold">Run a scan <span aria-hidden="true">→</span></a>
+    <p id="last-scan" class="mt-4 hidden text-xs text-slate-500"></p>
+  </div>
+
+  <div id="error" class="hidden mx-auto max-w-md py-24 text-center">
+    <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl border border-rose-500/40 bg-rose-500/10 text-xl">⚠️</div>
+    <h1 class="mt-4 text-xl font-bold text-white">Couldn't load results</h1>
+    <p id="error-msg" class="mt-2 text-sm text-slate-400"></p>
+    <a href="/trial" class="btn-gradient mt-6 inline-flex items-center gap-2 rounded-xl px-5 py-3 text-sm font-bold">Run a new scan <span aria-hidden="true">→</span></a>
+  </div>
+
+  <div id="results" class="hidden">
+    <div class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+      <div>
+        <p class="text-xs font-semibold uppercase tracking-widest text-indigo-400">Live scan results</p>
+        <h1 id="thesis-name" class="mt-1 text-2xl font-bold tracking-tight text-white sm:text-3xl"></h1>
+        <div id="thesis-tags" class="mt-2 flex flex-wrap gap-1.5"></div>
+      </div>
+      <a href="/trial" class="self-start rounded-lg border border-slate-700 bg-slate-800/60 px-4 py-2 text-sm font-semibold text-slate-300 hover:border-indigo-500/50 hover:text-white sm:self-auto">↻ Run another</a>
+    </div>
+    <p id="thesis-desc" class="mt-3 max-w-3xl text-sm leading-relaxed text-slate-400"></p>
+
+    <div id="memo-progress" class="mt-6 hidden items-center gap-3 rounded-xl border border-indigo-500/30 bg-indigo-500/10 px-4 py-3 text-sm text-indigo-200">
+      <span class="spinner shrink-0"></span>
+      <span id="memo-progress-text">Writing deal memos…</span>
+    </div>
+
+    <div class="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
+      <div class="rounded-xl border border-slate-800 bg-slate-900/60 px-4 py-3"><p class="text-[11px] font-semibold uppercase tracking-wider text-slate-500">Companies scanned</p><p id="stat-scanned" class="mt-1 text-2xl font-bold text-white">–</p></div>
+      <div class="rounded-xl border border-slate-800 bg-slate-900/60 px-4 py-3"><p class="text-[11px] font-semibold uppercase tracking-wider text-slate-500">Matches found</p><p id="stat-matches" class="mt-1 text-2xl font-bold text-white">–</p></div>
+      <div class="rounded-xl border border-slate-800 bg-slate-900/60 px-4 py-3"><p class="text-[11px] font-semibold uppercase tracking-wider text-slate-500">Memos written</p><p id="stat-memos" class="mt-1 text-2xl font-bold text-emerald-400">–</p></div>
+      <div class="rounded-xl border border-slate-800 bg-slate-900/60 px-4 py-3"><p class="text-[11px] font-semibold uppercase tracking-wider text-slate-500">Top match</p><p id="stat-top" class="mt-1 text-2xl font-bold text-white">–</p></div>
+    </div>
+
+    <div class="mt-8">
+      <div class="mb-3 flex items-center justify-between">
+        <h2 class="text-sm font-bold uppercase tracking-wider text-slate-400">Scored matches</h2>
+        <span id="match-note" class="text-xs text-slate-500"></span>
+      </div>
+      <div id="match-list" class="space-y-3"></div>
+      <div id="empty-matches" class="hidden rounded-2xl border border-slate-800 bg-slate-900/60 px-6 py-10 text-center">
+        <p class="text-sm font-semibold text-slate-300">No strong matches found</p>
+        <p class="mt-2 text-xs text-slate-500">Try a different thesis, or give the pipeline a moment and re-run.</p>
+      </div>
+    </div>
+
+    <div class="mt-10 rounded-2xl border border-indigo-500/30 bg-gradient-to-br from-indigo-500/10 via-slate-900/60 to-cyan-500/10 p-6 text-center sm:p-8">
+      <h2 class="text-xl font-bold text-white sm:text-2xl">Like what you see?</h2>
+      <p class="mx-auto mt-2 max-w-xl text-sm text-slate-400">This is one scan. Scout AI runs it around the clock — scraping startup databases, tracking founder movements, building theses and memos, and drafting outreach — for less than a junior analyst's stipend.</p>
+      <a href="/#pricing" class="btn-gradient mt-6 inline-flex items-center gap-2 rounded-xl px-7 py-3 text-sm font-bold">Get Scout AI <span aria-hidden="true">→</span></a>
+      <p class="mt-3 text-xs text-slate-500">Solo $499 · Studio $1,499 · Firm $3,999 · <span class="text-indigo-400">20% off during launch week</span></p>
+    </div>
+  </div>
+</main>
+
+<footer class="mx-auto max-w-5xl px-5 pb-10 text-center text-xs text-slate-600 sm:px-8">Scout AI · <a href="/" class="text-indigo-500 hover:underline">getscoutai.app</a> · <a href="/terms" class="text-indigo-500 hover:underline">Terms</a> · <a href="/privacy" class="text-indigo-500 hover:underline">Privacy</a></footer>
+
+<script>
+// ── Helpers ────────────────────────────────────────────────────────────
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+
+function scoreClass(score) { return score >= 0.7 ? "score-high" : score >= 0.45 ? "score-mid" : "score-low"; }
+function recClass(rec) { return "rec-" + rec; }
+function recLabel(rec) {
+  return { strong_buy: "Strong Buy", buy: "Buy", hold: "Hold", pass: "Pass" }[rec] || (rec ? rec.charAt(0).toUpperCase() + rec.slice(1) : "");
+}
+function memoStatusText(m) { return m ? "" : "memo queued"; }
+
+// Tiny markdown renderer for the memo body (strip the JSON block).
+function renderMarkdown(md) {
+  const cleaned = String(md || "").replace(/```json[\s\S]*?```/g, "").trim();
+  const lines = cleaned.split("\n");
+  let html = "";
+  let inList = false;
+  for (const raw of lines) {
+    const line = raw.trim();
+    if (!line) { if (inList) { html += "</ul>"; inList = false; } continue; }
+    const h = line.match(/^#{2,3}\s+(.*)/);
+    if (h) { if (inList) { html += "</ul>"; inList = false; } html += "<h3>" + esc(h[1]) + "</h3>"; continue; }
+    const li = line.match(/^[-*]\s+(.*)/);
+    if (li) { if (!inList) { html += "<ul>"; inList = true; } html += "<li>" + inline(li[1]) + "</li>"; continue; }
+    if (inList) { html += "</ul>"; inList = false; }
+    html += "<p>" + inline(line) + "</p>";
+  }
+  if (inList) html += "</ul>";
+  return html;
+}
+function inline(s) {
+  return esc(s)
+    .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
+    .replace(/(^|[^*])\*(?!\s)(.+?)(?<!\s)\*/g, "$1<em>$2</em>")
+    .replace(/`(.+?)`/g, "<code>$1</code>");
+}
+
+function memoPanelHtml(m) {
+  const swot = m.swot || { strengths: [], weaknesses: [], opportunities: [], threats: [] };
+  const scores = m.scores || { team: 0, market: 0, traction: 0, overall: 0 };
+  const grid = (items, color) => items && items.length
+    ? '<ul class="mt-1.5 space-y-1">' + items.map((i) => "<li class=\"text-xs leading-relaxed " + color + "\">• " + esc(i) + "</li>").join("") + "</ul>"
+    : '<p class="mt-1.5 text-xs text-slate-600">—</p>';
+  return (
+    '<div class="mt-3 rounded-xl border border-slate-700/70 bg-slate-950/60 p-4 sm:p-5">' +
+      '<div class="flex flex-wrap items-center justify-between gap-2">' +
+        '<span class="badge ' + recClass(m.recommendation) + '">' + recLabel(m.recommendation) + '</span>' +
+        '<span class="text-[11px] text-slate-500">Generated by Scout AI · GPT-4o</span>' +
+      '</div>' +
+      '<div class="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4">' +
+        scoreCell("Team", scores.team) + scoreCell("Market", scores.market) + scoreCell("Traction", scores.traction) + scoreCell("Overall", scores.overall) +
+      '</div>' +
+      '<div class="mt-4 grid gap-3 sm:grid-cols-2">' +
+        '<div class="rounded-lg border border-emerald-500/25 bg-emerald-500/5 px-3 py-2.5"><p class="text-[10px] font-bold uppercase tracking-wider text-emerald-400">Strengths</p>' + grid(swot.strengths, "text-emerald-300/90") + '</div>' +
+        '<div class="rounded-lg border border-rose-500/25 bg-rose-500/5 px-3 py-2.5"><p class="text-[10px] font-bold uppercase tracking-wider text-rose-400">Weaknesses</p>' + grid(swot.weaknesses, "text-rose-300/90") + '</div>' +
+        '<div class="rounded-lg border border-cyan-500/25 bg-cyan-500/5 px-3 py-2.5"><p class="text-[10px] font-bold uppercase tracking-wider text-cyan-400">Opportunities</p>' + grid(swot.opportunities, "text-cyan-300/90") + '</div>' +
+        '<div class="rounded-lg border border-amber-500/25 bg-amber-500/5 px-3 py-2.5"><p class="text-[10px] font-bold uppercase tracking-wider text-amber-400">Threats</p>' + grid(swot.threats, "text-amber-300/90") + '</div>' +
+      '</div>' +
+      '<div class="memo-md mt-4 border-t border-slate-800 pt-2">' + renderMarkdown(m.content) + '</div>' +
+    '</div>'
+  );
+}
+function scoreCell(label, value) {
+  const color = value >= 7 ? "text-emerald-400" : value >= 5 ? "text-amber-400" : "text-rose-400";
+  return '<div class="rounded-lg border border-slate-800 bg-slate-900/70 px-2 py-2 text-center"><p class="text-[10px] text-slate-500">' + label + '</p><p class="text-sm font-bold ' + color + '">' + (value ?? "-") + '<span class="text-[10px] font-normal text-slate-600">/10</span></p></div>';
+}
+
+// ── State ───────────────────────────────────────────────────────────────
+let state = { thesis: null, matches: [], memoCount: 0 };
+let generating = false;
+const expanded = new Set(); // matchIds with visible memo panels
+
+function render() {
+  const t = state.thesis;
+  $("thesis-name").textContent = t.name;
+  $("thesis-desc").textContent = t.description || "";
+  $("thesis-tags").innerHTML =
+    (t.sectors || []).map((s) => '<span class="rounded-md bg-indigo-500/15 border border-indigo-500/30 px-2 py-0.5 text-[11px] font-semibold text-indigo-300">' + esc(s) + "</span>").join("") +
+    (t.stages || []).map((s) => '<span class="rounded-md bg-cyan-500/15 border border-cyan-500/30 px-2 py-0.5 text-[11px] font-semibold text-cyan-300">' + esc(s) + "</span>").join("");
+  $("stat-scanned").textContent = state.companiesScanned ?? "–";
+  $("stat-matches").textContent = state.matchesTotal ?? state.matches.length;
+  $("stat-memos").textContent = state.memoCount;
+  $("stat-top").textContent = state.matches.length ? Math.round(state.matches[0].score * 100) + "%" : "–";
+
+  const list = $("match-list");
+  const withMemo = state.matches.filter((m) => m.memo);
+  $("match-note").textContent = state.matches.length
+    ? "Top " + state.matches.length + " of " + (state.matchesTotal ?? "—") + " matches · click a match for its memo"
+    : "";
+
+  if (state.matches.length === 0) {
+    $("empty-matches").classList.remove("hidden");
+    list.innerHTML = "";
+  } else {
+    $("empty-matches").classList.add("hidden");
+    list.innerHTML = state.matches.map(matchRowHtml).join("");
+  }
+
+  const pending = state.matches.filter((m) => !m.memo).length;
+  if (pending > 0 && state.matches.length > 0) {
+    $("memo-progress").classList.remove("hidden");
+    $("memo-progress-text").textContent = "Writing deal memos… " + (state.memoCount) + " of " + state.matches.length + " ready (" + pending + " queued). This takes ~20s per memo.";
+  } else {
+    $("memo-progress").classList.add("hidden");
+  }
+}
+
+function matchRowHtml(m, idx) {
+  const pct = Math.round(m.score * 100);
+  const memoBadge = m.memo
+    ? '<span class="badge ' + recClass(m.memo.recommendation) + '">' + recLabel(m.memo.recommendation) + '</span>'
+    : '<span class="inline-flex items-center gap-1.5 rounded-full border border-slate-700 bg-slate-800/60 px-2.5 py-0.5 text-[10px] font-semibold text-slate-400"><span class="spinner" style="width:.7rem;height:.7rem;border-width:1.5px"></span>Analyzing…</span>';
+  const tags = [m.sector, m.stage].filter(Boolean).map((v) => '<span class="hidden rounded-full bg-slate-700/50 px-2 py-0.5 text-[10px] font-medium text-slate-300 sm:inline">' + esc(v) + "</span>").join("");
+  const memo = m.memo ? memoPanelHtml(m.memo) : "";
+  const isOpen = expanded.has(m.matchId);
+  const memoSlot = '<div class="memo-slot ' + (isOpen ? "" : "hidden") + '" data-match-id="' + esc(m.matchId) + '">' + (m.memo ? memo : isOpen ? '<p class="px-4 pb-3 text-xs text-indigo-300">Memo queued — it appears here automatically once written.</p>' : "") + '</div>';
+  return (
+    '<div class="match-row overflow-hidden rounded-xl border border-slate-800 bg-slate-900/60 transition-colors" data-idx="' + idx + '">' +
+      '<div class="flex items-center gap-3 px-4 py-3.5 sm:px-5">' +
+        '<div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-indigo-500/80 to-violet-600/80 text-xs font-bold text-white">' + esc((m.companyName || "?").charAt(0).toUpperCase()) + '</div>' +
+        '<div class="min-w-0 flex-1">' +
+          '<div class="flex flex-wrap items-center gap-2"><h3 class="truncate text-sm font-semibold text-slate-100">' + esc(m.companyName) + '</h3>' + tags + memoBadge + '</div>' +
+          '<p class="mt-0.5 line-clamp-1 text-xs text-slate-500">' + (m.description ? esc(m.description).slice(0, 140) : "No description available") + '</p>' +
+        '</div>' +
+        '<div class="badge shrink-0 ' + scoreClass(m.score) + '">' + pct + '%</div>' +
+        '<span class="shrink-0 text-slate-600" aria-hidden="true">▾</span>' +
+      '</div>' +
+      memoSlot +
+    '</div>'
+  );
+}
+
+// ── Memo generation loop ────────────────────────────────────────────────
+async function generateLoop() {
+  if (generating) return;
+  generating = true;
+  try {
+    // Keep generating until every top match has a memo.
+    while (true) {
+      const pendingIdx = state.matches.findIndex((m) => !m.memo);
+      if (pendingIdx === -1) break;
+      let res;
+      try {
+        res = await fetch("/api/trial/memo", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ thesisId: state.thesis.id }),
+        });
+      } catch {
+        break; // network hiccup — user can reload to resume
+      }
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) break;
+      if (data.done || !data.generated) break;
+      if (data.memo && data.matchId) {
+        const m = state.matches.find((x) => x.matchId === data.matchId);
+        if (m) { m.memo = data.memo; state.memoCount++; }
+        render(); // rebuilds the list; expanded panels stay open via `expanded`
+      }
+      await new Promise((r) => setTimeout(r, 400));
+    }
+  } finally {
+    generating = false;
+    render();
+  }
+}
+
+// ── Load results ────────────────────────────────────────────────────────
+async function loadResults(thesisId) {
+  const res = await fetch("/api/trial/results?thesisId=" + encodeURIComponent(thesisId)).catch(() => null);
+  if (!res) { showError("Network error — please try again."); return; }
+  if (res.status === 404) { showError("That scan doesn't exist or has expired."); return; }
+  const data = await res.json().catch(() => null);
+  if (!data || !data.thesis) { showError("Could not load results — please try again."); return; }
+  state = {
+    thesis: data.thesis,
+    matches: data.matches || [],
+    memoCount: data.memoCount || 0,
+    companiesScanned: data.companiesScanned,
+    matchesTotal: data.matchesTotal,
+  };
+  $("loading").classList.add("hidden");
+  $("results").classList.remove("hidden");
+  render();
+  generateLoop();
+}
+
+function showError(msg) {
+  $("loading").classList.add("hidden");
+  $("error-msg").textContent = msg;
+  $("error").classList.remove("hidden");
+}
+
+// ── Boot ────────────────────────────────────────────────────────────────
+document.addEventListener("DOMContentLoaded", () => {
+  const params = new URLSearchParams(window.location.search);
+  const thesisId = params.get("thesisId");
+
+  // Expand/collapse on click (event delegation)
+  document.addEventListener("click", (e) => {
+    const row = e.target.closest(".match-row");
+    if (!row) return;
+    const slot = row.querySelector(".memo-slot");
+    if (!slot) return;
+    const matchId = slot.dataset.matchId;
+    if (expanded.has(matchId)) {
+      expanded.delete(matchId);
+      slot.classList.add("hidden");
+    } else {
+      expanded.add(matchId);
+      slot.classList.remove("hidden");
+      const m = state.matches[Number(row.dataset.idx)];
+      if (m && !m.memo) {
+        slot.innerHTML = '<p class="px-4 pb-3 text-xs text-indigo-300">Memo queued — it appears here automatically once written.</p>';
+      }
+    }
+  });
+
+  if (!thesisId) {
+    $("loading").classList.add("hidden");
+    $("no-scan").classList.remove("hidden");
+    try {
+      const last = JSON.parse(localStorage.getItem("scoutai_last_trial") || "null");
+      if (last && last.thesisId) {
+        $("last-scan").innerHTML = '<a class="text-indigo-400 hover:underline" href="/trial/results?thesisId=' + encodeURIComponent(last.thesisId) + '">View your last scan ("' + esc(last.name || "thesis") + '") →</a>';
+        $("last-scan").classList.remove("hidden");
+      }
+    } catch {}
+    return;
+  }
+  loadResults(thesisId);
+});
+</script>
+</body>
+</html>
