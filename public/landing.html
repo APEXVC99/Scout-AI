@@ -75,30 +75,8 @@ that never sleeps
 <p class="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-gray-600 sm:text-xl">
 Scout AI deploys autonomous AI agents that source investment deals around the clock — scraping databases, tracking founder movements, building investment theses and deal memos, and sending personalized outreach. Top-tier deal flow, without the top-tier headcount.
 </p>
-<!-- Countdown -->
-<div class="mx-auto mt-8 max-w-md"><div class="rounded-2xl border-2 border-orange-200 bg-gradient-to-br from-orange-50 to-amber-50 p-4 shadow-sm"><p class="text-xs font-bold uppercase tracking-widest text-orange-600">🍊 Launching on Product Hunt</p><div class="mt-3 flex justify-center gap-3 text-center"><div class="min-w-[60px] rounded-xl bg-white px-3 py-2 shadow-sm"><span class="text-2xl font-black text-orange-600" id="countdown-days">02</span><p class="text-[10px] font-semibold uppercase tracking-wider text-slate-400">Days</p></div><div class="min-w-[60px] rounded-xl bg-white px-3 py-2 shadow-sm"><span class="text-2xl font-black text-orange-600" id="countdown-hours">00</span><p class="text-[10px] font-semibold uppercase tracking-wider text-slate-400">Hours</p></div><div class="min-w-[60px] rounded-xl bg-white px-3 py-2 shadow-sm"><span class="text-2xl font-black text-orange-600" id="countdown-mins">00</span><p class="text-[10px] font-semibold uppercase tracking-wider text-slate-400">Mins</p></div><div class="min-w-[60px] rounded-xl bg-white px-3 py-2 shadow-sm"><span class="text-2xl font-black text-orange-600" id="countdown-secs">00</span><p class="text-[10px] font-semibold uppercase tracking-wider text-slate-400">Secs</p></div></div><p class="mt-2 text-xs text-orange-700">Wednesday, August 5 · <span class="font-bold">20% off</span> launch pricing</p></div></div>
-<script>
-(function(){
-var target = new Date("2026-08-05T00:00:01-07:00").getTime();
-function pad(n){return n<10?"0"+n:n}
-function tick(){
-var now = Date.now();
-var d = Math.max(0,Math.floor((target-now)/864e5));
-var h = Math.max(0,Math.floor((target-now)/36e5)%24);
-var m = Math.max(0,Math.floor((target-now)/6e4)%60);
-var s = Math.max(0,Math.floor((target-now)/1e3)%60);
-var days=document.getElementById("countdown-days");
-var hours=document.getElementById("countdown-hours");
-var mins=document.getElementById("countdown-mins");
-var secs=document.getElementById("countdown-secs");
-if(days)days.textContent=pad(d);
-if(hours)hours.textContent=pad(h);
-if(mins)mins.textContent=pad(m);
-if(secs)secs.textContent=pad(s);
-}
-tick();setInterval(tick,1000);
-})();
-</script>
+<!-- Promo code (placeholder) -->
+<div id="promo-banner" class="mx-auto mt-8 max-w-md hidden"><div class="rounded-2xl border-2 border-orange-200 bg-gradient-to-br from-orange-50 to-amber-50 p-4 shadow-sm"><p class="text-xs font-bold uppercase tracking-widest text-orange-600">🎟️ Special offer</p><p class="mt-2 text-sm text-orange-700">Use code <span class="font-bold" id="promo-code">—</span> at checkout.</p></div></div>
 <div class="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
 <a href="/sign-up" class="btn-gradient inline-flex items-center gap-2 rounded-xl px-6 py-3 text-base font-semibold">
 Get Started Free
@@ -223,12 +201,12 @@ Get Started Free
 <!-- Divider -->
 <div class="section-divider mx-auto max-w-4xl"></div>
 
-<!-- Product Hunt Promo -->
-<div class="mx-auto max-w-2xl px-6 pt-16 text-center">
+<!-- Promo code placeholder (enable by removing `hidden` and setting the code) -->
+<div class="mx-auto max-w-2xl px-6 pt-16 text-center hidden" id="promo-section">
 <div class="rounded-2xl border border-orange-200 bg-gradient-to-br from-orange-50 via-amber-50 to-yellow-50 p-6">
-<span class="inline-flex items-center gap-1.5 rounded-full bg-orange-500 px-3 py-1 text-xs font-bold uppercase tracking-wide text-white">🍊 Product Hunt Launch</span>
-<p class="mt-3 text-lg font-semibold text-orange-900">20% off your first month</p>
-<p class="mt-1 text-sm text-orange-700">Use the links below — launch pricing ends soon.</p>
+<span class="inline-flex items-center gap-1.5 rounded-full bg-orange-500 px-3 py-1 text-xs font-bold uppercase tracking-wide text-white">🎟️ Special offer</span>
+<p class="mt-3 text-lg font-semibold text-orange-900">Use code <span id="promo-section-code">—</span> at checkout</p>
+<p class="mt-1 text-sm text-orange-700">Discount applied to your first month.</p>
 </div>
 </div>
 
