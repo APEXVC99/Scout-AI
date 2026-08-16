@@ -152,6 +152,7 @@ form.addEventListener("submit", async (e) => {
 
   btn.disabled = true;
   btn.innerHTML = '<span class="spinner"></span><span>Scanning live feeds &amp; scoring companies…</span>';
+  try { if (window.umami && window.umami.track) window.umami.track('trial_run', { sectors: sectors.length, stages: stages.length }); } catch (_) {}
   try {
     const res = await fetch("/api/trial/run", {
       method: "POST",
@@ -166,6 +167,7 @@ form.addEventListener("submit", async (e) => {
       return;
     }
     try { localStorage.setItem("scoutai_last_trial", JSON.stringify({ thesisId: data.thesisId, name, at: Date.now() })); } catch {}
+    try { if (window.umami && window.umami.track) window.umami.track('trial_complete', { thesisId: data.thesisId }); } catch (_) {}
     window.location.href = "/trial/results?thesisId=" + encodeURIComponent(data.thesisId);
   } catch (err) {
     showError("Network error — please try again.");

@@ -82,6 +82,7 @@ function pickTier(tier) {
   })
   .then(function(r){ return r.json(); })
   .then(function(data){
+    try { if (window.umami && window.umami.track) window.umami.track('purchase_confirmed', { tier: tier || null }); } catch (_) {}
     if (data.success) {
       var msg = 'Payment confirmed';
       if (data.productName) msg += ' &mdash; ' + data.productName + ' plan';
