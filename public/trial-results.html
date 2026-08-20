@@ -107,6 +107,28 @@ body{font-family:Inter,ui-sans-serif,system-ui;background:radial-gradient(1100px
       <a href="/#pricing" class="btn-gradient mt-6 inline-flex items-center gap-2 rounded-xl px-7 py-3 text-sm font-bold">Get Scout AI <span aria-hidden="true">→</span></a>
       <p class="mt-3 text-xs text-slate-500">Solo $499 · Studio $1,499 · Firm $3,999</p>
     </div>
+    <!-- ── Waitlist CTA: early-access 20% launch-pricing lock ────────── -->
+    <div id="trial-waitlist" class="mt-10 rounded-2xl border border-emerald-500/25 bg-slate-900/70 p-6 text-center sm:p-8">
+      <span class="badge score-high" style="background:rgba(16,185,129,.12);border:1px solid rgba(16,185,129,.3);color:#6ee7b7">Early-access pricing</span>
+      <h2 class="mt-3 text-xl font-bold text-white sm:text-2xl">Want this as a working pipeline?</h2>
+      <p class="mx-auto mt-2 max-w-xl text-sm text-slate-400">Join the early-access list and lock in 20% off launch pricing — ends Sep 30, 2026.</p>
+      <form id="wl-form" class="mx-auto mt-6 max-w-md" onsubmit="submitTrialWaitlist(event)">
+        <div class="flex flex-col gap-3 sm:flex-row">
+          <label class="sr-only" for="wl-email">Email address</label>
+          <input id="wl-email" name="email" type="email" required placeholder="you@yourfund.com" class="flex-1 rounded-xl border border-slate-700 bg-slate-800/70 px-4 py-3 text-sm text-white placeholder:text-slate-500 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20">
+          <button id="wl-btn" type="submit" class="btn-gradient inline-flex items-center justify-center gap-2 rounded-xl px-6 py-3 text-sm font-bold">Join waitlist</button>
+        </div>
+        <p id="wl-error" class="mt-3 hidden text-sm text-rose-400"></p>
+        <p class="mt-3 text-xs text-slate-500">No spam, ever — we'll only email you about Scout AI early access.</p>
+      </form>
+      <div id="wl-success" class="mx-auto mt-2 hidden max-w-md rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-6">
+        <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-full" style="background:linear-gradient(135deg,#34d399,#0d9488)">
+          <svg class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+        </div>
+        <h3 class="mt-4 text-lg font-bold text-white">You're on the list</h3>
+        <p class="mt-2 text-sm text-slate-300">Your 20% launch-pricing lock is saved. We'll be in touch at <strong id="wl-signed-up" class="text-emerald-300"></strong>.</p>
+      </div>
+    </div>
   </div>
 </main>
 
@@ -123,6 +145,46 @@ function recLabel(rec) {
   return { strong_buy: "Strong Buy", buy: "Buy", hold: "Hold", pass: "Pass" }[rec] || (rec ? rec.charAt(0).toUpperCase() + rec.slice(1) : "");
 }
 function memoStatusText(m) { return m ? "" : "memo queued"; }
+// ── Waitlist CTA (early-access 20% launch-pricing lock) ────────────────
+async function submitTrialWaitlist(e) {
+  if (e) e.preventDefault();
+  const emailEl = document.getElementById("wl-email");
+  const btn = document.getElementById("wl-btn");
+  const errorEl = document.getElementById("wl-error");
+  const email = emailEl.value.trim();
+  errorEl.classList.add("hidden");
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    errorEl.textContent = "Please enter a valid email address.";
+    errorEl.classList.remove("hidden");
+    return;
+  }
+  btn.disabled = true;
+  const original = btn.textContent;
+  btn.innerHTML = '<span class="spinner"></span><span>Joining…</span>';
+  try {
+    const res = await fetch("/api/waitlist", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email }),
+    });
+    const data = await res.json();
+    if (data.success) {
+      document.getElementById("wl-signed-up").textContent = email;
+      document.getElementById("wl-form").classList.add("hidden");
+      document.getElementById("wl-success").classList.remove("hidden");
+      emailEl.value = "";
+      try { if (window.umami && window.umami.track) window.umami.track("waitlist_signup"); } catch (_) {}
+    } else {
+      errorEl.textContent = data.error || "Something went wrong.";
+      errorEl.classList.remove("hidden");
+    }
+  } catch {
+    errorEl.textContent = "Something went wrong. Please try again.";
+    errorEl.classList.remove("hidden");
+  }
+  btn.disabled = false;
+  btn.textContent = original;
+}
 
 // Tiny markdown renderer for the memo body (strip the JSON block).
 function renderMarkdown(md) {
